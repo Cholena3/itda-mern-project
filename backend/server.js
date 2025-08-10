@@ -22,6 +22,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Debug endpoint (remove in production)
+app.get('/debug/env', (req, res) => {
+  const mongoUri = process.env.MONGODB_URI;
+  res.json({
+    hasMongoUri: !!mongoUri,
+    uriLength: mongoUri?.length || 0,
+    uriStart: mongoUri?.substring(0, 30) + '...',
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT
+  });
+});
+
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
