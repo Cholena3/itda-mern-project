@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run install-all:*)",
+      "Bash(net start:*)",
+      "Bash(mongod:*)",
+      "Bash(where mongod)",
+      "Bash(powershell:*)",
+      "Bash(\"C:\\Program Files\\MongoDB\\Server\\8.0\\bin\\mongosh.exe\" --eval \"db.version()\" --quiet)",
+      "Bash(dir:*)",
+      "Bash(npm run dev:*)",
+      "Bash(grep:*)",
+      "Bash(npm start)",
+      "Bash(npm install:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "Bash(where mysql)",
+      "Bash(node:*)"
+    ],
+    "deny": []
+  }
+}
