@@ -28,9 +28,15 @@ import {
   Person,
   Logout,
   Settings,
-  FilterList
+  FilterList,
+  Search,
+  MonitorHeart,
+  Api,
+  Notifications
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import NotificationCenter from './NotificationCenter';
+import OnlineUsersIndicator from './OnlineUsersIndicator';
 
 const drawerWidth = 240;
 
@@ -62,9 +68,19 @@ const navigationItems: NavigationItem[] = [
     icon: <Work />,
   },
   {
+    label: 'AI Search',
+    path: '/search',
+    icon: <Search />,
+  },
+  {
     label: 'Location Filter',
     path: '/filter',
     icon: <FilterList />,
+  },
+  {
+    label: 'System Monitor',
+    path: '/monitoring',
+    icon: <MonitorHeart />,
   },
 ];
 
@@ -180,7 +196,21 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
             {navigationItems.find(item => item.path === location.pathname)?.label || 'ITDA Management System'}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Quick Access Buttons */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, mr: 2 }}>
+            <IconButton
+              color="inherit"
+              onClick={() => window.open('http://localhost:5000/api-docs', '_blank')}
+              title="API Documentation"
+            >
+              <Api />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <OnlineUsersIndicator variant="compact" />
+            <NotificationCenter />
+            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
             <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
               Welcome, {user?.username}
             </Typography>

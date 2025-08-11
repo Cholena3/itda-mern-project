@@ -3,13 +3,18 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 
 // Context
 import { AuthProvider } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
 
 // Components
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
+import AIAssistant from './components/AIAssistant';
+import NotificationCenter from './components/NotificationCenter';
+import OnlineUsersIndicator from './components/OnlineUsersIndicator';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -20,6 +25,8 @@ import SchemesPage from './pages/SchemesPage';
 import ProjectsPage from './pages/ProjectsPage';
 import WorksPage from './pages/WorksPage';
 import FilteredViewPage from './pages/FilteredViewPage';
+import MonitoringPage from './pages/MonitoringPage';
+import AdvancedSearch from './components/AdvancedSearch';
 
 // Create theme
 const theme = createTheme({
@@ -66,8 +73,10 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <Router>
-            <Routes>
+          <SocketProvider>
+            <Router>
+              <Toaster position="top-right" />
+              <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -124,11 +133,35 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route
+                path="/search"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <AdvancedSearch />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/monitoring"
+                element={
+                  <PrivateRoute>
+                    <Layout>
+                      <MonitoringPage />
+                    </Layout>
+                  </PrivateRoute>
+                }
+              />
               
               {/* Default redirect */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            
+            {/* Global Components */}
+            <AIAssistant />
           </Router>
+          </SocketProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
