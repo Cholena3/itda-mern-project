@@ -11,27 +11,37 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Chip
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import {
   Work,
   AccountTree,
   Assignment,
   CheckCircle,
-  Schedule,
   MonetizationOn,
-  TrendingUp,
-  Warning
+  PieChartOutline,
+  BarChart as BarChartIcon
 } from '@mui/icons-material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend,
-  LineChart, Line, Area, AreaChart
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
-import { DashboardStats } from '../types';
 import { dashboardAPI } from '../services/api';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = [
+  '#2563eb', // Blue
+  '#10b981', // Emerald
+  '#f59e0b', // Amber
+  '#ef4444', // Red
+  '#8b5cf6', // Violet
+  '#06b6d4', // Cyan
+  '#ec4899', // Pink
+  '#84cc16', // Lime
+  '#f97316', // Orange
+  '#6366f1'  // Indigo
+];
 const STATUS_COLORS = {
   'Active': '#00C49F',
   'Completed': '#0088FE',
@@ -43,6 +53,7 @@ const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [schemeChartType, setSchemeChartType] = useState<'pie' | 'bar'>('pie');
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -85,11 +96,18 @@ const DashboardPage: React.FC = () => {
   }
 
   // Prepare chart data
-  const schemeBudgetData = stats.schemeBudgets?.map((scheme: any) => ({
-    name: scheme.name.length > 20 ? scheme.name.substring(0, 20) + '...' : scheme.name,
+  const schemeBudgetData = stats.schemeBudgets?.map((scheme: any, index: number) => ({
+    name: scheme.name.length > 25 ? scheme.name.substring(0, 25) + '...' : scheme.name,
     value: scheme.projectsBudget || scheme.schemeBudget,
-    fullName: scheme.name
+    fullName: scheme.name,
+    percentage: 0 // Will be calculated later
   })) || [];
+  
+  // Calculate percentages for scheme budget data
+  const totalSchemeBudget = schemeBudgetData.reduce((sum: number, item: any) => sum + item.value, 0);
+  schemeBudgetData.forEach((item: any) => {
+    item.percentage = totalSchemeBudget > 0 ? ((item.value / totalSchemeBudget) * 100).toFixed(1) : 0;
+  });
 
   const workStatusData = stats.workStatusDistribution?.map((status: any) => ({
     name: status._id || 'Unknown',
@@ -142,15 +160,28 @@ const DashboardPage: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload[0]) {
       return (
-        <Paper sx={{ p: 1 }}>
-          <Typography variant="body2">{payload[0].payload.fullName || label}</Typography>
+        <Paper sx={{ p: 1.5, minWidth: 200 }}>
+          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+            {payload[0].payload.fullName || label}
+          </Typography>
           <Typography variant="body2" color="primary">
             {formatCurrency(payload[0].value)}
+          </Typography>
+          <Typography variant="caption" color="textSecondary">
+            {payload[0].payload.percentage}% of total
           </Typography>
         </Paper>
       );
     }
     return null;
+  };
+  
+  const renderCustomLabel = (data: any) => {
+    // Only show label for segments > 5%
+    if (data.percentage > 5) {
+      return `${data.percentage}%`;
+    }
+    return '';
   };
 
   return (
@@ -249,62 +280,180 @@ const DashboardPage: React.FC = () => {
       {/* Charts */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
         {/* Scheme Budget Distribution */}
-        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 45%' } }}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Scheme-wise Budget Allocation
-            </Typography>
-            <Box sx={{ width: '100%', height: 300 }}>
+        <Box sx={{ flex: { xs: '1 1 100%', lg: '1 1 48%' } }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Scheme-wise Budget Allocation
+              </Typography>
+              <ToggleButtonGroup
+                value={schemeChartType}
+                exclusive
+                onChange={(e, value) => value && setSchemeChartType(value)}
+                size="small"
+              >
+                <ToggleButton value="pie">
+                  <PieChartOutline fontSize="small" />
+                </ToggleButton>
+                <ToggleButton value="bar">
+                  <BarChartIcon fontSize="small" />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+            <Box sx={{ width: '100%', height: 280 }}>
               <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={schemeBudgetData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} (${percent ? (percent * 100).toFixed(0) : 0}%)`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
+                {schemeChartType === 'pie' ? (
+                  <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                    <Pie
+                      data={schemeBudgetData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={renderCustomLabel}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {schemeBudgetData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                ) : (
+                  <BarChart 
+                    data={schemeBudgetData.slice(0, 8)} 
+                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                   >
-                    {schemeBudgetData.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="name"
+                      angle={-45}
+                      textAnchor="end"
+                      height={100}
+                      tick={{ fontSize: 10 }}
+                      interval={0}
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => `₹${(value/10000000).toFixed(1)}Cr`}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="value" fill="#8884d8">
+                      {schemeBudgetData.slice(0, 8).map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                )}
               </ResponsiveContainer>
+            </Box>
+            {/* Custom Legend for Pie Chart */}
+            {schemeChartType === 'pie' && (
+              <Box sx={{ mt: 2, maxHeight: 100, overflowY: 'auto' }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {schemeBudgetData.map((item: any, index: number) => (
+                    <Box 
+                      key={index} 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        width: 'calc(50% - 4px)',
+                        mb: 0.5
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: '50%',
+                          bgcolor: COLORS[index % COLORS.length],
+                          mr: 1,
+                          flexShrink: 0
+                        }}
+                      />
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          fontSize: '11px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={item.fullName}
+                      >
+                        {item.name}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+            {/* Summary Statistics */}
+            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="textSecondary">
+                  Total Schemes: {schemeBudgetData.length}
+                </Typography>
+                <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
+                  Total Budget: {formatCurrency(totalSchemeBudget)}
+                </Typography>
+              </Box>
+              {schemeChartType === 'bar' && schemeBudgetData.length > 10 && (
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1 }}>
+                  Showing top 10 schemes by budget
+                </Typography>
+              )}
             </Box>
           </Paper>
         </Box>
 
         {/* Work Status Distribution */}
-        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 45%' } }}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
+        <Box sx={{ flex: { xs: '1 1 100%', lg: '1 1 48%' } }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
               Work Status Distribution
             </Typography>
-            <Box sx={{ width: '100%', height: 300 }}>
+            <Box sx={{ width: '100%', height: 350 }}>
               <ResponsiveContainer>
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <Pie
                     data={workStatusData}
                     cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={80}
+                    cy="45%"
+                    innerRadius={50}
+                    outerRadius={100}
                     fill="#8884d8"
-                    paddingAngle={5}
+                    paddingAngle={3}
                     dataKey="value"
+                    label={({ value, percent }) => `${value} (${percent ? (percent * 100).toFixed(0) : 0}%)`}
                   >
                     {workStatusData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip formatter={(value: any) => [`${value} works`, 'Count']} />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    formatter={(value: string) => (
+                      <span style={{ fontSize: '12px' }}>
+                        {value}
+                      </span>
+                    )}
+                  />
                 </PieChart>
               </ResponsiveContainer>
+            </Box>
+            {/* Summary Statistics */}
+            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" color="textSecondary">
+                  Total Works: {stats.totalWorks}
+                </Typography>
+                <Typography variant="body2" color="success.main" sx={{ fontWeight: 500 }}>
+                  Completed: {stats.completedWorks}
+                </Typography>
+              </Box>
             </Box>
           </Paper>
         </Box>

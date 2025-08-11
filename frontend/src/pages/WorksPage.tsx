@@ -25,8 +25,7 @@ import {
 import {
   Add,
   Edit,
-  Delete,
-  Visibility
+  Delete
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { Work, CreateWorkData, Scheme, Project, StatusOptions } from '../types';
@@ -427,14 +426,24 @@ const WorksPage: React.FC = () => {
                         fullWidth
                         label="Project"
                         error={!!errors.projectId}
-                        helperText={errors.projectId?.message}
+                        helperText={errors.projectId?.message || (!watchSchemeId ? 'Please select a scheme first' : '')}
                         disabled={submitting || !watchSchemeId}
                       >
-                        {filteredProjects.map((project) => (
-                          <MenuItem key={project._id} value={project._id}>
-                            {project.name}
+                        {!watchSchemeId ? (
+                          <MenuItem value="" disabled>
+                            Select a scheme first
                           </MenuItem>
-                        ))}
+                        ) : filteredProjects.length > 0 ? (
+                          filteredProjects.map((project) => (
+                            <MenuItem key={project._id} value={project._id}>
+                              {project.name}
+                            </MenuItem>
+                          ))
+                        ) : (
+                          <MenuItem value="" disabled>
+                            No projects available for selected scheme
+                          </MenuItem>
+                        )}
                       </TextField>
                     )}
                   />

@@ -23,9 +23,7 @@ import {
 } from '@mui/material';
 import {
   Add,
-  Edit,
-  Delete,
-  Visibility
+  Edit
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { Project, CreateProjectData, Scheme, StatusOptions } from '../types';
@@ -278,14 +276,6 @@ const ProjectsPage: React.FC = () => {
                         title="Edit"
                       >
                         <Edit />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(project)}
-                        title="Delete"
-                        color="error"
-                      >
-                        <Delete />
                       </IconButton>
                     </TableCell>
                   )}

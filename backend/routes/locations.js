@@ -96,32 +96,6 @@ const parlakhemundiLocations = {
           villages: ['Juba', 'Amjhiri', 'Birikote', 'Chitapalli']
         }
       ]
-    },
-    {
-      name: 'Kashinagar',
-      gramPanchayats: [
-        {
-          name: 'Kashinagar',
-          villages: ['Kashinagar', 'Gochhabadi', 'Jagilipadar', 'Khajuripalli']
-        },
-        {
-          name: 'Parlakhemundi',
-          villages: ['Parlakhemundi', 'Badabarsingi', 'Chandiput', 'Gurandi']
-        }
-      ]
-    },
-    {
-      name: 'Gosani',
-      gramPanchayats: [
-        {
-          name: 'Gosani',
-          villages: ['Gosani', 'Bhurudi', 'Gaiba', 'Hatibadi']
-        },
-        {
-          name: 'Karada',
-          villages: ['Karada', 'Adheigaon', 'Bamunigaon', 'Dakhinpur']
-        }
-      ]
     }
   ]
 };

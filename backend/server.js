@@ -2,62 +2,253 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
+const morgan = require('morgan');
+const http = require('http');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 require('dotenv').config();
 
+// Import security middleware
+const {
+  rateLimiters,
+  preventSQLInjection,
+  preventNoSQLInjection,
+  preventXSS,
+  securityHeaders,
+  mongoSanitize,
+  auditLog,
+  corsOptions,
+  securityLogger
+} = require('./middleware/security');
+
+// Import cache and socket services
+const { cache, redis } = require('./config/redis');
+const socketService = require('./services/socketService');
+const { cacheStrategies } = require('./middleware/cache');
+
 const app = express();
+const server = http.createServer(app);
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Initialize WebSocket service
+socketService.initialize(server, corsOptions);
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Security middleware - Order matters!
+app.use(securityHeaders); // Add security headers first
+app.use(cors(corsOptions)); // CORS with whitelist
+app.use(compression()); // Compress responses
+app.use(morgan('combined')); // HTTP request logging
+app.use(express.json({ limit: '10mb' })); // JSON body parser with size limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(mongoSanitize()); // Prevent NoSQL injection
+app.use(preventXSS); // XSS prevention
+app.use(preventSQLInjection); // SQL injection prevention
+app.use(preventNoSQLInjection); // NoSQL injection prevention
 
-// Add health check endpoint
-app.get('/health', (req, res) => {
-  const status = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+// Apply rate limiting to all routes
+app.use('/api/', rateLimiters.general);
+app.use('/api/auth', rateLimiters.auth);
+
+// Static files with security
+app.use('/uploads', 
+  rateLimiters.strict,
+  express.static(path.join(__dirname, 'uploads'), {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '7d'
+  })
+);
+
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'ITDA API Documentation',
+}));
+
+// Health check endpoint with caching
+app.get('/health', cacheStrategies.custom(10), async (req, res) => {
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  const redisStatus = redis.status === 'ready' ? 'connected' : 'disconnected';
+  const onlineUsers = socketService.getOnlineUsersCount();
+  
   res.json({ 
     status: 'ok', 
-    mongodb: status,
+    services: {
+      mongodb: mongoStatus,
+      redis: redisStatus,
+      websocket: 'active'
+    },
+    metrics: {
+      onlineUsers,
+      uptime: process.uptime(),
+      memory: process.memoryUsage()
+    },
     timestamp: new Date().toISOString()
   });
 });
 
-// Debug endpoint (remove in production)
-app.get('/debug/env', (req, res) => {
-  const mongoUri = process.env.MONGODB_URI;
-  res.json({
-    hasMongoUri: !!mongoUri,
-    uriLength: mongoUri?.length || 0,
-    uriStart: mongoUri?.substring(0, 30) + '...',
-    nodeEnv: process.env.NODE_ENV,
-    port: process.env.PORT
+// System metrics endpoint (protected)
+app.get('/api/metrics', 
+  rateLimiters.strict,
+  auditLog('VIEW_METRICS'),
+  async (req, res) => {
+    try {
+      const metrics = {
+        cache: {
+          hits: await cache.get('stats:cache:hits') || 0,
+          misses: await cache.get('stats:cache:misses') || 0
+        },
+        users: {
+          online: socketService.getOnlineUsersCount(),
+          list: socketService.getOnlineUsers()
+        },
+        system: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          cpu: process.cpuUsage()
+        }
+      };
+      res.json(metrics);
+    } catch (error) {
+      securityLogger.error('Metrics error:', error);
+      res.status(500).json({ error: 'Failed to fetch metrics' });
+    }
+});
+
+// MongoDB connection with retry logic
+const connectDB = async () => {
+  const maxRetries = 5;
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      await mongoose.connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 30000,
+        socketTimeoutMS: 45000,
+      });
+      
+      console.log('MongoDB connected successfully');
+      console.log('Database:', mongoose.connection.db.databaseName);
+      
+      // Set up connection event handlers
+      mongoose.connection.on('error', (err) => {
+        securityLogger.error('MongoDB error:', err);
+      });
+      
+      mongoose.connection.on('disconnected', () => {
+        securityLogger.warn('MongoDB disconnected');
+      });
+      
+      break;
+    } catch (err) {
+      retries++;
+      console.error(`MongoDB connection attempt ${retries} failed:`, err.message);
+      
+      if (retries === maxRetries) {
+        console.error('Max retries reached. Exiting...');
+        process.exit(1);
+      }
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+};
+
+// Connect to databases
+connectDB();
+
+// Connect to Redis
+redis.connect().then(() => {
+  console.log('Redis connected successfully');
+}).catch(err => {
+  console.error('Redis connection error:', err);
+  // Continue without Redis (degraded mode)
+});
+
+// API Routes with caching and security
+app.use('/api/schemes', 
+  auditLog('SCHEMES'),
+  cacheStrategies.schemes,
+  require('./routes/schemes')
+);
+
+app.use('/api/projects',
+  auditLog('PROJECTS'), 
+  cacheStrategies.projects,
+  require('./routes/projects')
+);
+
+app.use('/api/works',
+  auditLog('WORKS'),
+  cacheStrategies.works,
+  require('./routes/works')
+);
+
+app.use('/api/photos',
+  rateLimiters.strict,
+  auditLog('PHOTOS'),
+  require('./routes/photos')
+);
+
+app.use('/api/auth',
+  auditLog('AUTH'),
+  require('./routes/auth')
+);
+
+app.use('/api/dashboard',
+  cacheStrategies.dashboard,
+  require('./routes/dashboard')
+);
+
+app.use('/api/locations',
+  cacheStrategies.custom(600),
+  require('./routes/locations')
+);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  securityLogger.error('Unhandled error:', {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    ip: req.ip
+  });
+  
+  res.status(err.status || 500).json({
+    error: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message
   });
 });
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 30000,
-  socketTimeoutMS: 45000,
-})
-.then(() => {
-  console.log('MongoDB connected successfully');
-  console.log('Database:', mongoose.connection.db.databaseName);
-})
-.catch(err => {
-  console.error('MongoDB connection error:', err);
-  console.error('Connection string:', process.env.MONGODB_URI?.replace(/\/\/.*@/, '//<credentials>@'));
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+  
+  await mongoose.connection.close();
+  await redis.quit();
+  
+  process.exit(0);
 });
 
-app.use('/api/schemes', require('./routes/schemes'));
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/works', require('./routes/works'));
-app.use('/api/photos', require('./routes/photos'));
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/dashboard', require('./routes/dashboard'));
-app.use('/api/locations', require('./routes/locations'));
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('Security features: Enabled');
+  console.log('Redis caching: Enabled');
+  console.log('WebSocket: Enabled');
 });

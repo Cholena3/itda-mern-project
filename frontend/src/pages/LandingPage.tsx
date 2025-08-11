@@ -151,15 +151,15 @@ const LandingPage: React.FC = () => {
                 Empowering Tribal Communities Through Integrated Development
               </Typography>
               <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.8 }}>
-                The Integrated Tribal Development Agency (ITDA) Gajapati, headquartered at Mohana, 
+                The Integrated Tribal Development Agency (ITDA) Gajapati, headquartered at Paralakhemundi, 
                 is dedicated to the socio-economic development of tribal communities in Gajapati district. 
-                Covering 7 blocks with a significant tribal population including the PVTG Lanjia Saora community, 
+                Covering 5 blocks with a significant tribal population including the PVTG Lanjia Saora community, 
                 we implement various welfare schemes and development programs.
               </Typography>
               <Stack direction="row" spacing={2}>
                 <Chip
                   icon={<LocationOn />}
-                  label="Mohana, Parlakhemundi"
+                  label="Paralakhemundi"
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
                 />
                 <Chip
@@ -250,7 +250,7 @@ const LandingPage: React.FC = () => {
                 Blocks Covered
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
-                {['Mohana', 'R.Udayagiri', 'Nuagada', 'Rayagada', 'Gumma', 'Kashinagar', 'Gosani'].map((block) => (
+                {['Mohana', 'R.Udayagiri', 'Nuagada', 'Rayagada', 'Gumma'].map((block) => (
                   <Chip
                     key={block}
                     label={block}
@@ -269,7 +269,7 @@ const LandingPage: React.FC = () => {
               </Typography>
               <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
                 • PVTG (Particularly Vulnerable Tribal Groups) - Lanjia Saora<br />
-                • 564 tribal villages across 7 blocks<br />
+                • 564 tribal villages across 5 blocks<br />
                 • Focus on health, education, and livelihood<br />
                 • Infrastructure development in remote areas
               </Typography>
@@ -289,9 +289,9 @@ const LandingPage: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
                 <LocationOn sx={{ mr: 1, color: 'primary.main', mt: 0.5 }} />
                 <Typography variant="body2">
-                  ITDA Office, Mohana<br />
-                  Parlakhemundi, District: Gajapati<br />
-                  Odisha - 761015
+                  ITDA Office<br />
+                  Paralakhemundi, District: Gajapati<br />
+                  Odisha - 761200
                 </Typography>
               </Box>
             </Grid>

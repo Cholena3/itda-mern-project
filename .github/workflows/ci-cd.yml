@@ -1,0 +1,233 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Testing Job
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: test
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install Backend Dependencies
+        run: npm ci
+      
+      - name: Install Frontend Dependencies
+        run: cd frontend && npm ci
+      
+      - name: Run Backend Tests
+        run: npm test
+        env:
+          MONGODB_URI: mongodb://test:test@localhost:27017/test?authSource=admin
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-secret
+      
+      - name: Run Frontend Tests
+        run: cd frontend && npm test -- --coverage --watchAll=false
+      
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info,./frontend/coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # Security Scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate
+          cd frontend && npm audit --audit-level=moderate
+
+  # Code Quality
+  quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install ESLint
+        run: npm install -g eslint
+      
+      - name: Run ESLint
+        run: |
+          eslint backend --ext .js --format json --output-file eslint-backend.json || true
+          cd frontend && eslint src --ext .tsx,.ts --format json --output-file ../eslint-frontend.json || true
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # Build and Push Docker Image
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security, quality]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.itda.com
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Staging Server
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/itda-app
+            docker-compose pull
+            docker-compose up -d --force-recreate
+            docker system prune -f
+
+  # Deploy to Production (Manual Approval)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://app.itda.com
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/itda-app
+            docker-compose pull
+            docker-compose up -d --force-recreate --scale app=3
+            docker system prune -f
+      
+      - name: Verify Deployment
+        run: |
+          sleep 30
+          curl -f https://app.itda.com/health || exit 1
+      
+      - name: Notify Deployment
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment completed!'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: always()

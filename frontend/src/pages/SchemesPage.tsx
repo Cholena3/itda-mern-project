@@ -23,9 +23,7 @@ import {
 } from '@mui/material';
 import {
   Add,
-  Edit,
-  Delete,
-  Visibility
+  Edit
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { Scheme, CreateSchemeData, StatusOptions } from '../types';
@@ -250,14 +248,6 @@ const SchemesPage: React.FC = () => {
                         title="Edit"
                       >
                         <Edit />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(scheme)}
-                        title="Delete"
-                        color="error"
-                      >
-                        <Delete />
                       </IconButton>
                     </TableCell>
                   )}
