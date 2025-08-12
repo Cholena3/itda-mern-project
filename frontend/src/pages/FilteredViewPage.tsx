@@ -77,15 +77,51 @@ const FilteredViewPage: React.FC = () => {
       setLocationData(response.data);
     } catch (error) {
       console.error('Error fetching location data:', error);
-      // Set some default data if API fails
+      // Set complete default data with gram panchayats and villages
       setLocationData({
         district: 'Gajapati (Parlakhemundi)',
         blocks: [
-          { name: 'Mohana', gramPanchayats: [] },
-          { name: 'R.Udayagiri', gramPanchayats: [] },
-          { name: 'Nuagada', gramPanchayats: [] },
-          { name: 'Rayagada', gramPanchayats: [] },
-          { name: 'Gumma', gramPanchayats: [] }
+          { 
+            name: 'Mohana', 
+            gramPanchayats: [
+              { name: 'Chandragiri', villages: ['Chandragiri', 'Tumba', 'Kereba', 'Badapada'] },
+              { name: 'Gangabada', villages: ['Gangabada', 'Kujasingh', 'Manikpur', 'Raibada'] },
+              { name: 'Luhagudi', villages: ['Luhagudi', 'Paniganda', 'Bhaliaguda', 'Kenduguda'] },
+              { name: 'Seranga', villages: ['Seranga', 'Katama', 'Jeeranga', 'Dhobaguda'] }
+            ] 
+          },
+          { 
+            name: 'R.Udayagiri', 
+            gramPanchayats: [
+              { name: 'Kinchilingi', villages: ['Kinchilingi', 'Sindhiba', 'Tarangini', 'Jharaguda'] },
+              { name: 'Dumbala', villages: ['Dumbala', 'Khadanga', 'Luhangi', 'Pandava'] },
+              { name: 'Ramagiri', villages: ['Ramagiri', 'Labanyagada', 'Ambaguda', 'Karadabadi'] },
+              { name: 'Padmapur', villages: ['Padmapur', 'Haridapadar', 'Jagannathpur', 'Bhimpur'] }
+            ] 
+          },
+          { 
+            name: 'Nuagada', 
+            gramPanchayats: [
+              { name: 'Alada', villages: ['Alada', 'Badasindhigaon', 'Dumuriguda', 'Kendupadar'] },
+              { name: 'Dimiripali', villages: ['Dimiripali', 'Adava', 'Badagada', 'Jharigaon'] },
+              { name: 'Loba', villages: ['Loba', 'Siriguda', 'Raibandha', 'Talamunda'] }
+            ] 
+          },
+          { 
+            name: 'Rayagada', 
+            gramPanchayats: [
+              { name: 'Koinpur', villages: ['Koinpur', 'Bhaleri', 'Garabandha', 'Jharigaon'] },
+              { name: 'Sindurapur', villages: ['Sindurapur', 'Badakalakote', 'Laxmipur', 'Ratnapur'] },
+              { name: 'Dura', villages: ['Dura', 'Jeerango', 'Kasipur', 'Mandimera'] }
+            ] 
+          },
+          { 
+            name: 'Gumma', 
+            gramPanchayats: [
+              { name: 'Gumma', villages: ['Gumma', 'Baghalati', 'Dhepaguda', 'Khandava'] },
+              { name: 'Juba', villages: ['Juba', 'Amjhiri', 'Birikote', 'Chitapalli'] }
+            ] 
+          }
         ]
       });
     }
@@ -145,11 +181,17 @@ const FilteredViewPage: React.FC = () => {
   const availableGPs = selectedBlock
     ? locationData?.blocks.find(b => b.name === selectedBlock)?.gramPanchayats || []
     : [];
+    
+  console.log('Selected Block:', selectedBlock);
+  console.log('Available GPs:', availableGPs);
 
   // Get available villages for selected GP
   const availableVillages = selectedGP
     ? availableGPs.find(gp => gp.name === selectedGP)?.villages || []
     : [];
+    
+  console.log('Selected GP:', selectedGP);
+  console.log('Available Villages:', availableVillages);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
