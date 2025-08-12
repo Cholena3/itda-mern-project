@@ -12,7 +12,7 @@ import {
   Divider,
   Chip,
   Stack,
-  Grid
+  Grid2 as Grid
 } from '@mui/material';
 import {
   Login,

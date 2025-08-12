@@ -12,7 +12,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
+  Grid2 as Grid,
   Card,
   CardContent,
   IconButton,
