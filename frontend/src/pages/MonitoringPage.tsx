@@ -18,7 +18,7 @@ import {
   Button,
   Alert,
 } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import Grid from '@mui/material/GridLegacy';
 import {
   Speed as SpeedIcon,
   Memory as MemoryIcon,
@@ -165,8 +165,8 @@ const MonitoringPage: React.FC = () => {
       </Box>
 
       {/* Quick Stats */}
-      <Grid2 container spacing={3} sx={{ mb: 3 }}>
-        <Grid2 item xs={12} md={3}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -186,9 +186,9 @@ const MonitoringPage: React.FC = () => {
               />
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 item xs={12} md={3}>
+        <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -208,9 +208,9 @@ const MonitoringPage: React.FC = () => {
               />
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 item xs={12} md={3}>
+        <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -230,9 +230,9 @@ const MonitoringPage: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid2>
+        </Grid>
 
-        <Grid2 item xs={12} md={3}>
+        <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -252,12 +252,12 @@ const MonitoringPage: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {/* Performance Charts */}
-      <Grid2 container spacing={3} sx={{ mb: 3 }}>
-        <Grid2 item xs={12} md={8}>
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
               Request & Response Time
@@ -289,9 +289,9 @@ const MonitoringPage: React.FC = () => {
               </AreaChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid2>
+        </Grid>
 
-        <Grid2 item xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
               Queue Status
@@ -316,8 +316,8 @@ const MonitoringPage: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
           </Paper>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {/* Service Health */}
       <Paper sx={{ p: 3, mb: 3 }}>

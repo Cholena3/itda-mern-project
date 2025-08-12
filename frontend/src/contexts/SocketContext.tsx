@@ -95,7 +95,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // Handle user status updates
     newSocket.on('user:online', (userId: string) => {
-      setOnlineUsers(prev => [...new Set([...prev, userId])]);
+      setOnlineUsers(prev => Array.from(new Set([...prev, userId])));
     });
 
     newSocket.on('user:offline', (data: { userId: string }) => {

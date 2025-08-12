@@ -20,7 +20,7 @@ import {
   Tooltip,
   LinearProgress
 } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import Grid from '@mui/material/GridLegacy';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
@@ -319,8 +319,8 @@ const AdvancedSearch: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Advanced Filters
           </Typography>
-          <Grid2 container spacing={3}>
-            <Grid2 item xs={12} md={3}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>Status</InputLabel>
                 <Select
@@ -335,8 +335,8 @@ const AdvancedSearch: React.FC = () => {
                   <MenuItem value="pending">Pending</MenuItem>
                 </Select>
               </FormControl>
-            </Grid2>
-            <Grid2 item xs={12} md={3}>
+            </Grid>
+            <Grid item xs={12} md={3}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>District</InputLabel>
                 <Select
@@ -351,8 +351,8 @@ const AdvancedSearch: React.FC = () => {
                   <MenuItem value="warangal">Warangal</MenuItem>
                 </Select>
               </FormControl>
-            </Grid2>
-            <Grid2 item xs={12} md={3}>
+            </Grid>
+            <Grid item xs={12} md={3}>
               <Typography gutterBottom>Budget Range</Typography>
               <Slider
                 value={filters.budgetRange}
@@ -362,8 +362,8 @@ const AdvancedSearch: React.FC = () => {
                 max={1000000}
                 step={10000}
               />
-            </Grid2>
-            <Grid2 item xs={12} md={3}>
+            </Grid>
+            <Grid item xs={12} md={3}>
               <Typography gutterBottom>Min Progress: {filters.progressMin}%</Typography>
               <Slider
                 value={filters.progressMin}
@@ -372,8 +372,8 @@ const AdvancedSearch: React.FC = () => {
                 min={0}
                 max={100}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </Paper>
       </Collapse>
 
@@ -381,9 +381,9 @@ const AdvancedSearch: React.FC = () => {
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       {/* Results */}
-      <Grid2 container spacing={3}>
+      <Grid container spacing={3}>
         {/* Facets */}
-        <Grid2 item xs={12} md={3}>
+        <Grid item xs={12} md={3}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Refine Results
@@ -436,10 +436,10 @@ const AdvancedSearch: React.FC = () => {
               ))}
             </Box>
           </Paper>
-        </Grid2>
+        </Grid>
 
         {/* Search Results */}
-        <Grid2 item xs={12} md={9}>
+        <Grid item xs={12} md={9}>
           <Typography variant="h6" gutterBottom>
             {results.length} Results found
           </Typography>
@@ -502,8 +502,8 @@ const AdvancedSearch: React.FC = () => {
               </CardContent>
             </Card>
           ))}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Box>
   );
 };
