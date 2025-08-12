@@ -1,6 +1,6 @@
-# ITDA Project Management System - MERN Stack
+# ITDA Project Management System
 
-A modern project management system built with MERN stack (MongoDB, Express.js, React, Node.js) for managing schemes, projects, works, and progress tracking.
+A comprehensive web application for managing Integrated Tribal Development Agency (ITDA) projects in Parlakhemundi, Gajapati District, Odisha. Built with MERN stack for robust performance and scalability.
 
 ## Features
 
