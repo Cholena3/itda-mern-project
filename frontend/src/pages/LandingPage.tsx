@@ -11,9 +11,9 @@ import {
   Avatar,
   Divider,
   Chip,
-  Stack,
-  Grid2 as Grid
+  Stack
 } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
 import {
   Login,
   Groups,
@@ -142,8 +142,8 @@ const LandingPage: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid size={{ xs: 12, md: 8 }}>
+          <Grid2 container spacing={4} alignItems="center">
+            <Grid2 size={{ xs: 12, md: 8 }}>
               <Typography variant="h2" gutterBottom sx={{ fontWeight: 700 }}>
                 ITDA
               </Typography>
@@ -167,16 +167,16 @@ const LandingPage: React.FC = () => {
                   sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
                 />
               </Stack>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Container>
       </Box>
 
       {/* Statistics Section */}
       <Container maxWidth="lg" sx={{ mt: -4, mb: 6 }}>
-        <Grid container spacing={3}>
+        <Grid2 container spacing={3}>
           {statsData.map((stat, index) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={index}>
               <Paper
                 elevation={3}
                 sx={{
@@ -196,9 +196,9 @@ const LandingPage: React.FC = () => {
                   {stat.label}
                 </Typography>
               </Paper>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Container>
 
       {/* Key Focus Areas */}
@@ -206,9 +206,9 @@ const LandingPage: React.FC = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 4, textAlign: 'center' }}>
           Our Key Focus Areas
         </Typography>
-        <Grid container spacing={3}>
+        <Grid2 container spacing={3}>
           {schemes.map((scheme, index) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <Card
                 sx={{
                   height: '100%',
@@ -233,9 +233,9 @@ const LandingPage: React.FC = () => {
                   </Typography>
                 </CardContent>
               </Card>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Container>
 
       {/* Coverage Area */}
@@ -244,8 +244,8 @@ const LandingPage: React.FC = () => {
           <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 4, textAlign: 'center' }}>
             Our Coverage Area
           </Typography>
-          <Grid container spacing={4}>
-            <Grid size={{ xs: 12, md: 6 }}>
+          <Grid2 container spacing={4}>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Blocks Covered
               </Typography>
@@ -262,8 +262,8 @@ const LandingPage: React.FC = () => {
                   />
                 ))}
               </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 6 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Special Focus
               </Typography>
@@ -273,16 +273,16 @@ const LandingPage: React.FC = () => {
                 • Focus on health, education, and livelihood<br />
                 • Infrastructure development in remote areas
               </Typography>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Container>
       </Box>
 
       {/* Contact Section */}
       <Box sx={{ bgcolor: 'grey.100', py: 6 }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid size={{ xs: 12, md: 4 }}>
+          <Grid2 container spacing={4}>
+            <Grid2 size={{ xs: 12, md: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Head Office
               </Typography>
@@ -294,8 +294,8 @@ const LandingPage: React.FC = () => {
                   Odisha - 761200
                 </Typography>
               </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Contact Us
               </Typography>
@@ -307,8 +307,8 @@ const LandingPage: React.FC = () => {
                 <Email sx={{ mr: 1, color: 'primary.main' }} />
                 <Typography variant="body2">itda@odisha.gov.in</Typography>
               </Box>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            </Grid2>
+            <Grid2 size={{ xs: 12, md: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Working Hours
               </Typography>
@@ -317,8 +317,8 @@ const LandingPage: React.FC = () => {
                 Saturday: 10:00 AM - 1:30 PM<br />
                 Sunday & Holidays: Closed
               </Typography>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </Container>
       </Box>
 
