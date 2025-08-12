@@ -40,9 +40,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.log('No token found, skipping WebSocket connection');
+      return;
+    }
 
-    const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+    // Remove /api from the URL for WebSocket connection
+    const socketUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000').replace('/api', '');
+    console.log('Connecting to WebSocket at:', socketUrl);
+    
+    const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -112,7 +119,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => {
       newSocket.close();
     };
-  }, []);
+  }, []); // Re-run when token changes (after login/logout)
 
   const joinProject = useCallback((projectId: string) => {
     if (socket) {
