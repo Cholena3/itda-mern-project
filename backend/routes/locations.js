@@ -6,7 +6,7 @@ const Scheme = require('../models/Scheme');
 
 // Parlakhemundi ITDA Location Data
 const parlakhemundiLocations = {
-  district: 'Gajapati',
+  district: 'Gajapati (Parlakhemundi)',
   blocks: [
     {
       name: 'Mohana',

@@ -55,6 +55,7 @@ interface FilteredData {
 const FilteredViewPage: React.FC = () => {
   const [locationData, setLocationData] = useState<LocationHierarchy | null>(null);
   const [selectedDistrict] = useState('Gajapati (Parlakhemundi)');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedBlock, setSelectedBlock] = useState('');
   const [selectedGP, setSelectedGP] = useState('');
   const [selectedVillage, setSelectedVillage] = useState('');
@@ -70,7 +71,7 @@ const FilteredViewPage: React.FC = () => {
 
   const fetchLocationHierarchy = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/locations/hierarchy');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/locations/hierarchy`);
       setLocationData(response.data);
     } catch (error) {
       console.error('Error fetching location data:', error);
@@ -99,8 +100,8 @@ const FilteredViewPage: React.FC = () => {
   const handleFilter = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/locations/filter', {
-        district: 'Gajapati',
+      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/locations/filter`, {
+        district: 'Gajapati (Parlakhemundi)',
         block: selectedBlock || undefined,
         gramPanchayat: selectedGP || undefined,
         village: selectedVillage || undefined,
@@ -172,10 +173,14 @@ const FilteredViewPage: React.FC = () => {
         </Box>
         
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-          {/* District (Fixed) */}
+          {/* District (Fixed for Parlakhemundi ITDA) */}
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>District</InputLabel>
-            <Select value={selectedDistrict} label="District" disabled>
+            <Select 
+              value="Gajapati (Parlakhemundi)" 
+              label="District" 
+              disabled
+            >
               <MenuItem value="Gajapati (Parlakhemundi)">Gajapati (Parlakhemundi)</MenuItem>
             </Select>
           </FormControl>

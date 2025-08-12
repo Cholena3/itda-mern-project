@@ -136,7 +136,7 @@ const AdvancedSearch: React.FC = () => {
           metrics: {
             progress: 65,
             budget: 500000,
-            location: 'Adilabad District',
+            location: 'Visakhapatnam District',
           },
         },
         {
@@ -150,7 +150,7 @@ const AdvancedSearch: React.FC = () => {
           metrics: {
             progress: 40,
             budget: 300000,
-            location: 'Khammam District',
+            location: 'Srikakulam District',
           },
         },
         {
@@ -164,7 +164,7 @@ const AdvancedSearch: React.FC = () => {
           metrics: {
             progress: 80,
             budget: 250000,
-            location: 'Warangal District',
+            location: 'Vizianagaram District',
           },
         },
       ];
@@ -179,9 +179,11 @@ const AdvancedSearch: React.FC = () => {
           { name: 'Pending', count: 5 },
         ],
         districts: [
-          { name: 'Adilabad', count: 10 },
-          { name: 'Khammam', count: 8 },
-          { name: 'Warangal', count: 6 },
+          { name: 'Visakhapatnam', count: 15 },
+          { name: 'Srikakulam', count: 12 },
+          { name: 'Vizianagaram', count: 10 },
+          { name: 'East Godavari', count: 8 },
+          { name: 'West Godavari', count: 6 },
         ],
         types: [
           { name: 'Infrastructure', count: 12 },
@@ -345,10 +347,20 @@ const AdvancedSearch: React.FC = () => {
                   displayEmpty
                   onChange={(e) => setFilters({ ...filters, district: e.target.value })}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="adilabad">Adilabad</MenuItem>
-                  <MenuItem value="khammam">Khammam</MenuItem>
-                  <MenuItem value="warangal">Warangal</MenuItem>
+                  <MenuItem value="">All Districts</MenuItem>
+                  <MenuItem value="srikakulam">Srikakulam</MenuItem>
+                  <MenuItem value="vizianagaram">Vizianagaram</MenuItem>
+                  <MenuItem value="visakhapatnam">Visakhapatnam</MenuItem>
+                  <MenuItem value="east-godavari">East Godavari</MenuItem>
+                  <MenuItem value="west-godavari">West Godavari</MenuItem>
+                  <MenuItem value="krishna">Krishna</MenuItem>
+                  <MenuItem value="guntur">Guntur</MenuItem>
+                  <MenuItem value="prakasam">Prakasam</MenuItem>
+                  <MenuItem value="nellore">Nellore</MenuItem>
+                  <MenuItem value="chittoor">Chittoor</MenuItem>
+                  <MenuItem value="kadapa">Kadapa</MenuItem>
+                  <MenuItem value="anantapur">Anantapur</MenuItem>
+                  <MenuItem value="kurnool">Kurnool</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -405,10 +417,10 @@ const AdvancedSearch: React.FC = () => {
               ))}
             </Box>
 
-            {/* District Facet */}
+            {/* Block Facet */}
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Districts
+                Blocks
               </Typography>
               {facets.districts.map((facet) => (
                 <Chip
