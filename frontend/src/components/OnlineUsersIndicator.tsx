@@ -67,8 +67,14 @@ const OnlineUsersIndicator: React.FC<OnlineUsersIndicatorProps> = ({
         <Chip
           label={`${displayCount} online`}
           size="small"
-          color={isConnected ? 'success' : 'default'}
-          variant="outlined"
+          sx={{ 
+            backgroundColor: isConnected ? '#FFD700' : '#9e9e9e',
+            color: '#000',
+            fontWeight: 'bold',
+            '& .MuiChip-icon': {
+              color: isConnected ? '#4CAF50' : '#f44336'
+            }
+          }}
           icon={<FiberManualRecord sx={{ fontSize: 10 }} />}
         />
         {onlineUsers.length > 0 && (
@@ -101,19 +107,24 @@ const OnlineUsersIndicator: React.FC<OnlineUsersIndicatorProps> = ({
       sx={{
         p: 2,
         borderRadius: 2,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
         color: 'white',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Badge
           variant="dot"
-          color={isConnected ? 'success' : 'error'}
-          sx={{ mr: 2 }}
+          sx={{ 
+            mr: 2,
+            '& .MuiBadge-dot': {
+              backgroundColor: isConnected ? '#4CAF50' : '#f44336',
+              boxShadow: isConnected ? '0 0 8px #4CAF50' : 'none'
+            }
+          }}
         >
           <Person />
         </Badge>
-        <Typography variant="h6">
+        <Typography variant="h6" sx={{ color: '#FFD700', fontWeight: 'bold' }}>
           Active Users ({displayCount})
         </Typography>
       </Box>
