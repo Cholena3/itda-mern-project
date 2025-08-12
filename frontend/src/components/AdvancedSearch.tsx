@@ -57,12 +57,12 @@ const AdvancedSearch: React.FC = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [facets, setFacets] = useState<{
     status: Facet[];
-    districts: Facet[];
+    categories: Facet[];
     types: Facet[];
-  }>({ status: [], districts: [], types: [] });
+  }>({ status: [], categories: [], types: [] });
   const [filters, setFilters] = useState({
     status: '',
-    district: '',
+    category: '',
     budgetRange: [0, 1000000],
     progressMin: 0,
     type: '',
@@ -178,12 +178,13 @@ const AdvancedSearch: React.FC = () => {
           { name: 'Completed', count: 8 },
           { name: 'Pending', count: 5 },
         ],
-        districts: [
-          { name: 'Visakhapatnam', count: 15 },
-          { name: 'Srikakulam', count: 12 },
-          { name: 'Vizianagaram', count: 10 },
-          { name: 'East Godavari', count: 8 },
-          { name: 'West Godavari', count: 6 },
+        categories: [
+          { name: 'Water Supply', count: 18 },
+          { name: 'Road Connectivity', count: 15 },
+          { name: 'Education Infrastructure', count: 12 },
+          { name: 'Health Services', count: 10 },
+          { name: 'Agriculture Development', count: 8 },
+          { name: 'Skill Development', count: 5 },
         ],
         types: [
           { name: 'Infrastructure', count: 12 },
@@ -340,27 +341,23 @@ const AdvancedSearch: React.FC = () => {
             </Grid>
             <Grid item xs={12} md={3}>
               <FormControl fullWidth variant="outlined">
-                <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>District</InputLabel>
+                <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>Category</InputLabel>
                 <Select
-                  value={filters.district}
-                  label="District"
+                  value={filters.category}
+                  label="Category"
                   displayEmpty
-                  onChange={(e) => setFilters({ ...filters, district: e.target.value })}
+                  onChange={(e) => setFilters({ ...filters, category: e.target.value })}
                 >
-                  <MenuItem value="">All Districts</MenuItem>
-                  <MenuItem value="srikakulam">Srikakulam</MenuItem>
-                  <MenuItem value="vizianagaram">Vizianagaram</MenuItem>
-                  <MenuItem value="visakhapatnam">Visakhapatnam</MenuItem>
-                  <MenuItem value="east-godavari">East Godavari</MenuItem>
-                  <MenuItem value="west-godavari">West Godavari</MenuItem>
-                  <MenuItem value="krishna">Krishna</MenuItem>
-                  <MenuItem value="guntur">Guntur</MenuItem>
-                  <MenuItem value="prakasam">Prakasam</MenuItem>
-                  <MenuItem value="nellore">Nellore</MenuItem>
-                  <MenuItem value="chittoor">Chittoor</MenuItem>
-                  <MenuItem value="kadapa">Kadapa</MenuItem>
-                  <MenuItem value="anantapur">Anantapur</MenuItem>
-                  <MenuItem value="kurnool">Kurnool</MenuItem>
+                  <MenuItem value="">All Categories</MenuItem>
+                  <MenuItem value="water-supply">Water Supply</MenuItem>
+                  <MenuItem value="road">Road Connectivity</MenuItem>
+                  <MenuItem value="education">Education Infrastructure</MenuItem>
+                  <MenuItem value="health">Health Services</MenuItem>
+                  <MenuItem value="agriculture">Agriculture Development</MenuItem>
+                  <MenuItem value="skill">Skill Development</MenuItem>
+                  <MenuItem value="housing">Housing</MenuItem>
+                  <MenuItem value="electricity">Electricity</MenuItem>
+                  <MenuItem value="sanitation">Sanitation</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -422,13 +419,13 @@ const AdvancedSearch: React.FC = () => {
               <Typography variant="subtitle2" gutterBottom>
                 Blocks
               </Typography>
-              {facets.districts.map((facet) => (
+              {facets.categories.map((facet) => (
                 <Chip
                   key={facet.name}
                   label={`${facet.name} (${facet.count})`}
                   size="small"
                   sx={{ m: 0.5 }}
-                  onClick={() => setFilters({ ...filters, district: facet.name.toLowerCase() })}
+                  onClick={() => setFilters({ ...filters, category: facet.name.toLowerCase() })}
                 />
               ))}
             </Box>
