@@ -55,7 +55,6 @@ interface FilteredData {
 const FilteredViewPage: React.FC = () => {
   const [locationData, setLocationData] = useState<LocationHierarchy | null>(null);
   const [selectedDistrict] = useState('Gajapati (Parlakhemundi)');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedBlock, setSelectedBlock] = useState('');
   const [selectedGP, setSelectedGP] = useState('');
   const [selectedVillage, setSelectedVillage] = useState('');
