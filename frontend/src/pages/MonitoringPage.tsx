@@ -259,17 +259,17 @@ const MonitoringPage: React.FC = () => {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
               Request & Response Time
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={performanceData}>
+              <AreaChart data={performanceData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="time" />
                 <YAxis yAxisId="left" />
                 <YAxis yAxisId="right" orientation="right" />
                 <ChartTooltip />
-                <Legend />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
                 <Area
                   yAxisId="left"
                   type="monotone"
@@ -293,18 +293,18 @@ const MonitoringPage: React.FC = () => {
 
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
               Queue Status
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+              <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                 <Pie
                   data={queueMetrics}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
+                  labelLine={true}
                   label={(entry) => `${entry.name}: ${entry.value}`}
-                  outerRadius={80}
+                  outerRadius={70}
                   fill="#8884d8"
                   dataKey="value"
                 >

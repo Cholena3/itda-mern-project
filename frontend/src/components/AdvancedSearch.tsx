@@ -234,13 +234,28 @@ const AdvancedSearch: React.FC = () => {
             label="Basic Search"
             onClick={() => setSearchMode('basic')}
             color={searchMode === 'basic' ? 'primary' : 'default'}
-            sx={{ mr: 1, bgcolor: searchMode === 'basic' ? 'white' : 'rgba(255,255,255,0.2)' }}
+            sx={{ 
+              mr: 1, 
+              bgcolor: searchMode === 'basic' ? 'white' : 'rgba(255,255,255,0.5)',
+              color: searchMode === 'basic' ? 'primary.main' : 'white',
+              fontWeight: searchMode === 'basic' ? 'bold' : 'normal',
+              '&:hover': {
+                bgcolor: searchMode === 'basic' ? 'white' : 'rgba(255,255,255,0.7)'
+              }
+            }}
           />
           <Chip
             label="Natural Language"
             onClick={() => setSearchMode('natural')}
             color={searchMode === 'natural' ? 'primary' : 'default'}
-            sx={{ bgcolor: searchMode === 'natural' ? 'white' : 'rgba(255,255,255,0.2)' }}
+            sx={{ 
+              bgcolor: searchMode === 'natural' ? 'white' : 'rgba(255,255,255,0.5)',
+              color: searchMode === 'natural' ? 'primary.main' : 'white',
+              fontWeight: searchMode === 'natural' ? 'bold' : 'normal',
+              '&:hover': {
+                bgcolor: searchMode === 'natural' ? 'white' : 'rgba(255,255,255,0.7)'
+              }
+            }}
             icon={<TrendingIcon />}
           />
         </Box>
@@ -306,11 +321,12 @@ const AdvancedSearch: React.FC = () => {
           </Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>Status</InputLabel>
                 <Select
                   value={filters.status}
                   label="Status"
+                  displayEmpty
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 >
                   <MenuItem value="">All</MenuItem>
@@ -321,11 +337,12 @@ const AdvancedSearch: React.FC = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>District</InputLabel>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel shrink={true} sx={{ bgcolor: 'white', px: 0.5 }}>District</InputLabel>
                 <Select
                   value={filters.district}
                   label="District"
+                  displayEmpty
                   onChange={(e) => setFilters({ ...filters, district: e.target.value })}
                 >
                   <MenuItem value="">All</MenuItem>

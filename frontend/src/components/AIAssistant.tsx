@@ -73,8 +73,32 @@ const AIAssistant: React.FC = () => {
     setLoading(true);
 
     try {
+      // Check if query is project-related
+      const projectKeywords = [
+        'project', 'scheme', 'work', 'budget', 'progress', 'itda', 'tribal',
+        'development', 'status', 'completion', 'funding', 'implementation',
+        'milestone', 'timeline', 'resource', 'allocation', 'report', 'analysis'
+      ];
+      
+      const isProjectRelated = projectKeywords.some(keyword => 
+        input.toLowerCase().includes(keyword)
+      );
+
+      if (!isProjectRelated) {
+        // Non-project related query response
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "I'm specifically designed to help with ITDA project management queries. Please ask me about projects, schemes, works, budgets, progress tracking, or other development-related topics.",
+          sender: 'ai',
+          timestamp: new Date(),
+          type: 'text',
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+        setLoading(false);
+        return;
+      }
+
       // Determine the type of query
-      const isProjectQuery = input.toLowerCase().includes('project');
       const isPrediction = input.toLowerCase().includes('predict') || input.toLowerCase().includes('when');
       const isInsight = input.toLowerCase().includes('insight') || input.toLowerCase().includes('analyze');
 
@@ -107,13 +131,13 @@ const AIAssistant: React.FC = () => {
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      // Fallback response for demo
+      // Fallback response for demo - project-related suggestions only
       const suggestions = [
-        "Based on current progress, Project Alpha is likely to complete by next quarter with 85% confidence.",
-        "I've analyzed your budget utilization: You're tracking 15% under budget across all active projects.",
-        "Anomaly detected: Project Beta's progress has stalled. Consider reallocating resources.",
-        "Your team's velocity has increased by 20% this month. Great job!",
-        "I recommend prioritizing Project Gamma due to its high ROI potential.",
+        "Based on current progress, the Road Infrastructure project is likely to complete by next quarter with 85% confidence.",
+        "Budget analysis: ITDA schemes are tracking 15% under budget across all active projects.",
+        "Anomaly detected: Tribal Housing scheme progress has stalled. Consider reallocating resources.",
+        "Project velocity has increased by 20% this month across all schemes.",
+        "I recommend prioritizing the Healthcare Facility Upgrade due to its high community impact.",
       ];
 
       const aiMessage: Message = {

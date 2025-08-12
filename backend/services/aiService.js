@@ -1,5 +1,5 @@
 const OpenAI = require('openai');
-const * as tf = require('@tensorflow/tfjs');
+const tf = require('@tensorflow/tfjs');
 const { cache } = require('../config/redis');
 
 class AIService {

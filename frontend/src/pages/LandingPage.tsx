@@ -109,7 +109,7 @@ const LandingPage: React.FC = () => {
               </Avatar>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                  ITDA Parlakhemundi
+                  ITDA
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
                   Integrated Tribal Development Agency
@@ -145,14 +145,14 @@ const LandingPage: React.FC = () => {
           <Grid container spacing={4} alignItems="center">
             <Grid size={{ xs: 12, md: 8 }}>
               <Typography variant="h2" gutterBottom sx={{ fontWeight: 700 }}>
-                ITDA Parlakhemundi
+                ITDA
               </Typography>
               <Typography variant="h5" gutterBottom sx={{ mb: 3, opacity: 0.95 }}>
                 Empowering Tribal Communities Through Integrated Development
               </Typography>
               <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.8 }}>
-                The Integrated Tribal Development Agency (ITDA) Gajapati, headquartered at Paralakhemundi, 
-                is dedicated to the socio-economic development of tribal communities in Gajapati district. 
+                The Integrated Tribal Development Agency (ITDA), headquartered at Paralakhemundi, 
+                is dedicated to the socio-economic development of tribal communities in the district. 
                 Covering 5 blocks with a significant tribal population including the PVTG Lanjia Saora community, 
                 we implement various welfare schemes and development programs.
               </Typography>
@@ -290,7 +290,7 @@ const LandingPage: React.FC = () => {
                 <LocationOn sx={{ mr: 1, color: 'primary.main', mt: 0.5 }} />
                 <Typography variant="body2">
                   ITDA Office<br />
-                  Paralakhemundi, District: Gajapati<br />
+                  Paralakhemundi<br />
                   Odisha - 761200
                 </Typography>
               </Box>
@@ -305,7 +305,7 @@ const LandingPage: React.FC = () => {
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Email sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="body2">itda.parlakhemundi@odisha.gov.in</Typography>
+                <Typography variant="body2">itda@odisha.gov.in</Typography>
               </Box>
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
@@ -327,7 +327,7 @@ const LandingPage: React.FC = () => {
         <Container maxWidth="lg">
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
             <Typography variant="body2">
-              © 2024 ITDA Parlakhemundi. All rights reserved.
+              © 2024 ITDA. All rights reserved.
             </Typography>
             <Typography variant="body2">
               Government of Odisha | ST & SC Development Department

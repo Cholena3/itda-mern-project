@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
           </IconButton>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography component="h1" variant="h4" gutterBottom>
-              ITDA Parlakhemundi
+              ITDA
             </Typography>
             <Typography component="h2" variant="h5" sx={{ mb: 3 }}>
               Sign In

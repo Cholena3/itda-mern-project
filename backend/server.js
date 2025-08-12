@@ -208,6 +208,28 @@ app.use('/api/locations',
   require('./routes/locations')
 );
 
+// AI routes
+app.use('/api/ai',
+  rateLimiters.general,
+  auditLog('AI'),
+  require('./routes/ai')
+);
+
+// Search routes
+app.use('/api/search',
+  rateLimiters.general,
+  auditLog('SEARCH'),
+  cacheStrategies.custom(300),
+  require('./routes/search')
+);
+
+// Monitoring routes
+app.use('/api/monitoring',
+  rateLimiters.strict,
+  auditLog('MONITORING'),
+  require('./routes/monitoring')
+);
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

@@ -127,7 +127,7 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div" color="primary">
-          ITDA Parlakhemundi
+          ITDA
         </Typography>
       </Toolbar>
       <Divider />

@@ -17,7 +17,8 @@
       "Bash(where mysql)",
       "Bash(node:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

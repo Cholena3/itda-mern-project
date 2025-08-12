@@ -193,17 +193,17 @@ const DashboardPage: React.FC = () => {
       {/* Stats Cards */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 3 }}>
         <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
-          <Card sx={{ bgcolor: '#e3f2fd' }}>
+          <Card sx={{ bgcolor: '#fff', border: '2px solid #1976d2' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Total Schemes
                   </Typography>
-                  <Typography variant="h5">
+                  <Typography variant="h5" sx={{ color: '#1976d2', fontWeight: 'bold' }}>
                     {stats.totalSchemes}
                   </Typography>
-                  <Typography variant="body2" color="success.main">
+                  <Typography variant="body2" sx={{ color: '#4caf50', fontWeight: 500 }}>
                     {stats.activeSchemes} Active
                   </Typography>
                 </Box>
@@ -214,17 +214,17 @@ const DashboardPage: React.FC = () => {
         </Box>
 
         <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
-          <Card sx={{ bgcolor: '#f3e5f5' }}>
+          <Card sx={{ bgcolor: '#fff', border: '2px solid #9c27b0' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Total Projects
                   </Typography>
-                  <Typography variant="h5">
+                  <Typography variant="h5" sx={{ color: '#9c27b0', fontWeight: 'bold' }}>
                     {stats.totalProjects}
                   </Typography>
-                  <Typography variant="body2" color="success.main">
+                  <Typography variant="body2" sx={{ color: '#4caf50', fontWeight: 500 }}>
                     {stats.activeProjects} Active
                   </Typography>
                 </Box>
@@ -235,17 +235,17 @@ const DashboardPage: React.FC = () => {
         </Box>
 
         <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
-          <Card sx={{ bgcolor: '#e8f5e9' }}>
+          <Card sx={{ bgcolor: '#fff', border: '2px solid #4caf50' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Total Works
                   </Typography>
-                  <Typography variant="h5">
+                  <Typography variant="h5" sx={{ color: '#4caf50', fontWeight: 'bold' }}>
                     {stats.totalWorks}
                   </Typography>
-                  <Typography variant="body2" color="info.main">
+                  <Typography variant="body2" sx={{ color: '#2196f3', fontWeight: 500 }}>
                     {stats.completedWorks} Completed
                   </Typography>
                 </Box>
@@ -256,17 +256,17 @@ const DashboardPage: React.FC = () => {
         </Box>
 
         <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
-          <Card sx={{ bgcolor: '#fff3e0' }}>
+          <Card sx={{ bgcolor: '#fff', border: '2px solid #ff9800' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box>
                   <Typography color="textSecondary" gutterBottom>
                     Total Budget
                   </Typography>
-                  <Typography variant="h5">
+                  <Typography variant="h5" sx={{ color: '#ff9800', fontWeight: 'bold' }}>
                     {formatCurrency(stats.totalBudget)}
                   </Typography>
-                  <Typography variant="body2" color="warning.main">
+                  <Typography variant="body2" sx={{ color: '#ff9800', fontWeight: 500 }}>
                     All Projects
                   </Typography>
                 </Box>
