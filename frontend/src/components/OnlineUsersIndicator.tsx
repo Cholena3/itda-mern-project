@@ -22,6 +22,9 @@ const OnlineUsersIndicator: React.FC<OnlineUsersIndicatorProps> = ({
   maxAvatars = 5,
 }) => {
   const { onlineUsers, isConnected } = useSocket();
+  
+  // Always show at least 1 user (the current user) when connected
+  const displayCount = isConnected ? Math.max(1, onlineUsers.length) : 0;
 
   const getInitials = (userId: string) => {
     return userId.substring(0, 2).toUpperCase();
@@ -62,7 +65,7 @@ const OnlineUsersIndicator: React.FC<OnlineUsersIndicatorProps> = ({
           <Person />
         </Badge>
         <Chip
-          label={`${onlineUsers.length} online`}
+          label={`${displayCount} online`}
           size="small"
           color={isConnected ? 'success' : 'default'}
           variant="outlined"
@@ -111,13 +114,13 @@ const OnlineUsersIndicator: React.FC<OnlineUsersIndicatorProps> = ({
           <Person />
         </Badge>
         <Typography variant="h6">
-          Active Users ({onlineUsers.length})
+          Active Users ({displayCount})
         </Typography>
       </Box>
 
-      {onlineUsers.length === 0 ? (
+      {onlineUsers.length === 0 && isConnected ? (
         <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          No other users online
+          You are the only user online
         </Typography>
       ) : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>

@@ -70,10 +70,24 @@ const FilteredViewPage: React.FC = () => {
 
   const fetchLocationHierarchy = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/locations/hierarchy`);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      console.log('Fetching location hierarchy from:', `${apiUrl}/api/locations/hierarchy`);
+      const response = await axios.get(`${apiUrl}/api/locations/hierarchy`);
+      console.log('Location data received:', response.data);
       setLocationData(response.data);
     } catch (error) {
       console.error('Error fetching location data:', error);
+      // Set some default data if API fails
+      setLocationData({
+        district: 'Gajapati (Parlakhemundi)',
+        blocks: [
+          { name: 'Mohana', gramPanchayats: [] },
+          { name: 'R.Udayagiri', gramPanchayats: [] },
+          { name: 'Nuagada', gramPanchayats: [] },
+          { name: 'Rayagada', gramPanchayats: [] },
+          { name: 'Gumma', gramPanchayats: [] }
+        ]
+      });
     }
   };
 

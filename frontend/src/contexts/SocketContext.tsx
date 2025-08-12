@@ -60,6 +60,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     newSocket.on('connect', () => {
       setIsConnected(true);
       toast.success('Connected to real-time updates');
+      // Request current online users list
+      newSocket.emit('get:online-users');
     });
 
     newSocket.on('disconnect', () => {
