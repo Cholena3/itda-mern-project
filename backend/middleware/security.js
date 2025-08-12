@@ -208,18 +208,29 @@ const auditLog = (action) => {
 // CORS configuration with whitelist
 const corsOptions = {
   origin: function (origin, callback) {
-    const whitelist = process.env.CORS_WHITELIST 
-      ? process.env.CORS_WHITELIST.split(',') 
-      : ['http://localhost:3000', 'http://localhost:5000'];
-    
-    if (!origin || whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
+    // In production, allow specific origins
+    if (process.env.NODE_ENV === 'production') {
+      const whitelist = process.env.CORS_WHITELIST 
+        ? process.env.CORS_WHITELIST.split(',') 
+        : [
+            'http://localhost:3000', 
+            'http://localhost:5000',
+            'https://itda-frontend.onrender.com',
+            'https://itda-mern-project.onrender.com',
+            // Add any other potential Render URLs
+          ];
+      
+      // Allow requests with no origin (like mobile apps) or from whitelist
+      if (!origin || whitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        // In production, be more permissive temporarily for debugging
+        console.log('CORS request from:', origin);
+        callback(null, true); // Allow all origins temporarily
+      }
     } else {
-      securityLogger.warn('CORS blocked request', {
-        origin,
-        timestamp: new Date().toISOString()
-      });
-      callback(new Error('Not allowed by CORS'));
+      // In development, allow all origins
+      callback(null, true);
     }
   },
   credentials: true,
