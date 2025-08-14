@@ -11,32 +11,47 @@ router.post('/advanced', auth, async (req, res) => {
   try {
     const { query, filters } = req.body;
     
-    // Use Elasticsearch if available
-    const results = await searchService.search(query, filters);
+    // Build MongoDB query with filters
+    const mongoQuery = {};
     
-    if (!results || results.length === 0) {
-      // Fallback to MongoDB search
+    // Add text search if query provided
+    if (query && query.trim()) {
       const searchRegex = new RegExp(query, 'i');
+      mongoQuery.$or = [
+        { name: searchRegex },
+        { description: searchRegex }
+      ];
+    }
+    
+    // Apply filters
+    const filterQuery = {};
+    if (filters.status && filters.status !== '') {
+      filterQuery.status = filters.status;
+    }
+    if (filters.category && filters.category !== '') {
+      filterQuery.category = filters.category;
+    }
+    if (filters.type && filters.type !== '') {
+      filterQuery.type = filters.type;
+    }
+    if (filters.progressMin !== undefined && filters.progressMin > 0) {
+      filterQuery.progress = { $gte: filters.progressMin };
+    }
+    if (filters.budgetRange && filters.budgetRange.length === 2) {
+      filterQuery.budget = { 
+        $gte: filters.budgetRange[0], 
+        $lte: filters.budgetRange[1] 
+      };
+    }
+    
+    // Combine query and filters
+    const finalQuery = { ...mongoQuery, ...filterQuery };
       
+      // Search in MongoDB with filters
       const [projects, schemes, works] = await Promise.all([
-        Project.find({ 
-          $or: [
-            { name: searchRegex },
-            { description: searchRegex }
-          ]
-        }).limit(5),
-        Scheme.find({ 
-          $or: [
-            { name: searchRegex },
-            { description: searchRegex }
-          ]
-        }).limit(5),
-        Work.find({ 
-          $or: [
-            { name: searchRegex },
-            { description: searchRegex }
-          ]
-        }).limit(5)
+        Project.find(finalQuery).limit(20),
+        Scheme.find(finalQuery).limit(20),
+        Work.find(finalQuery).limit(20)
       ]);
       
       const combinedResults = [
@@ -78,10 +93,15 @@ router.post('/advanced', auth, async (req, res) => {
         }))
       ];
       
-      res.json({ results: combinedResults });
-    } else {
-      res.json({ results });
-    }
+      res.json({ 
+        results: combinedResults,
+        total: combinedResults.length,
+        facets: {
+          status: [],
+          categories: [],
+          types: []
+        }
+      });
   } catch (error) {
     console.error('Advanced search error:', error);
     res.status(500).json({ error: 'Search failed', results: [] });

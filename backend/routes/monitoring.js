@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const os = require('os');
 const redis = require('../config/redis');
+const socketService = require('../services/socketService');
 
 // Get system metrics
 router.get('/metrics', auth, async (req, res) => {
@@ -30,7 +31,7 @@ router.get('/metrics', auth, async (req, res) => {
       requestsPerSecond: Math.floor(Math.random() * 500) + 1000,
       avgResponseTime: Math.floor(Math.random() * 50) + 70,
       errorRate: 0.02,
-      activeUsers: Math.floor(Math.random() * 100) + 300,
+      activeUsers: socketService.getOnlineUsersCount() || 0,
       cacheHitRate: cacheStats.hitRate,
       timestamp: new Date()
     });

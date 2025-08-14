@@ -5,6 +5,16 @@ const Project = require('../models/Project');
 const Work = require('../models/Work');
 
 router.get('/stats', async (req, res) => {
+  // Set a timeout for the entire request
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(503).json({ 
+        error: 'Service temporarily unavailable. Please try again.',
+        message: 'Dashboard data is being processed' 
+      });
+    }
+  }, 10000); // 10 second timeout
+  
   try {
     // Schemes statistics
     const totalSchemes = await Scheme.countDocuments();
@@ -143,6 +153,9 @@ router.get('/stats', async (req, res) => {
       .limit(5)
       .select('name budget status');
 
+    // Clear timeout before sending response
+    clearTimeout(timeout);
+    
     res.json({
       totalSchemes,
       totalProjects,
@@ -160,7 +173,28 @@ router.get('/stats', async (req, res) => {
       topSchemesByBudget
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    clearTimeout(timeout);
+    console.error('Dashboard stats error:', error);
+    
+    // Send minimal response on error
+    res.status(200).json({
+      totalSchemes: 0,
+      totalProjects: 0,
+      totalWorks: 0,
+      totalBudget: 0,
+      activeSchemes: 0,
+      activeProjects: 0,
+      activeWorks: 0,
+      completedWorks: 0,
+      recentActivity: [],
+      schemeBudgets: [],
+      workStatusDistribution: [],
+      progressDistribution: [],
+      budgetVsExpenditure: { totalBudget: 0, totalSpent: 0 },
+      topSchemesByBudget: [],
+      error: 'Failed to load some dashboard data',
+      partial: true
+    });
   }
 });
 

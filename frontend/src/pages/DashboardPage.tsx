@@ -59,10 +59,44 @@ const DashboardPage: React.FC = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
+        // Add timeout handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
         const data = await dashboardAPI.getStats();
+        clearTimeout(timeoutId);
+        
+        // Check if data is partial/error response
+        if (data.partial) {
+          setError('Some dashboard data could not be loaded. Showing available information.');
+        }
+        
         setStats(data);
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch dashboard statistics');
+        if (err.name === 'AbortError') {
+          setError('Dashboard is taking longer than expected to load. Please refresh the page.');
+        } else {
+          setError(err.message || 'Failed to fetch dashboard statistics');
+        }
+        // Set empty stats to prevent crashes
+        setStats({
+          totalSchemes: 0,
+          totalProjects: 0,
+          totalWorks: 0,
+          totalBudget: 0,
+          activeSchemes: 0,
+          activeProjects: 0,
+          activeWorks: 0,
+          completedWorks: 0,
+          recentActivity: [],
+          schemeBudgets: [],
+          workStatusDistribution: [],
+          progressDistribution: [],
+          budgetVsExpenditure: { totalBudget: 0, totalSpent: 0 },
+          topSchemesByBudget: []
+        });
       } finally {
         setLoading(false);
       }
