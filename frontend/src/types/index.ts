@@ -121,6 +121,13 @@ export interface DashboardStats {
   activeWorks: number;
   completedWorks: number;
   recentActivity: ActivityItem[];
+  schemeBudgets?: any[];
+  workStatusDistribution?: any[];
+  progressDistribution?: any[];
+  budgetVsExpenditure?: { totalBudget: number; totalSpent: number };
+  topSchemesByBudget?: any[];
+  error?: string;
+  partial?: boolean;
 }
 
 export interface ActivityItem {
