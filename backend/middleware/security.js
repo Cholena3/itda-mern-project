@@ -205,37 +205,12 @@ const auditLog = (action) => {
   };
 };
 
-// CORS configuration with whitelist
+// CORS configuration - temporarily allow all origins to fix production issue
 const corsOptions = {
-  origin: function (origin, callback) {
-    // In production, allow specific origins
-    if (process.env.NODE_ENV === 'production') {
-      const whitelist = process.env.CORS_WHITELIST 
-        ? process.env.CORS_WHITELIST.split(',') 
-        : [
-            'http://localhost:3000', 
-            'http://localhost:5000',
-            'https://itda-frontend.onrender.com',
-            'https://itda-backend.onrender.com',
-            'https://itda-frontend.onrender.com',
-            'https://itda-mern-project.onrender.com',
-            // Add any other potential Render URLs
-          ];
-      
-      // Allow requests with no origin (like mobile apps) or from whitelist
-      if (!origin || whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        // In production, be more permissive temporarily for debugging
-        console.log('CORS request from:', origin);
-        callback(null, true); // Allow all origins temporarily
-      }
-    } else {
-      // In development, allow all origins
-      callback(null, true);
-    }
-  },
+  origin: true, // Allow all origins
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
