@@ -141,6 +141,8 @@ const WorksPage: React.FC = () => {
     if (work) {
       setEditingWork(work);
       setSelectedSchemeId(work.schemeId);
+      setSelectedBlock(work.block || '');
+      setSelectedGP(work.gramPanchayat || '');
       reset({
         name: work.name,
         description: work.description,
@@ -151,10 +153,15 @@ const WorksPage: React.FC = () => {
         endDate: work.endDate.split('T')[0],
         status: work.status,
         progress: work.progress,
+        block: work.block || '',
+        gramPanchayat: work.gramPanchayat || '',
+        village: work.village || '',
       });
     } else {
       setEditingWork(null);
       setSelectedSchemeId('');
+      setSelectedBlock('');
+      setSelectedGP('');
       reset({
         name: '',
         description: '',
@@ -165,6 +172,9 @@ const WorksPage: React.FC = () => {
         endDate: '',
         status: 'Planning',
         progress: 0,
+        block: '',
+        gramPanchayat: '',
+        village: '',
       });
     }
     setDialogOpen(true);
@@ -174,6 +184,8 @@ const WorksPage: React.FC = () => {
     setDialogOpen(false);
     setEditingWork(null);
     setSelectedSchemeId('');
+    setSelectedBlock('');
+    setSelectedGP('');
     reset();
   };
 
@@ -602,6 +614,96 @@ const WorksPage: React.FC = () => {
                         helperText={errors.endDate?.message}
                         disabled={submitting}
                       />
+                    )}
+                  />
+                </Box>
+              </Box>
+
+              {/* Location Fields */}
+              <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Location Details</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ width: { xs: '100%', sm: '48%' } }}>
+                  <Controller
+                    name="block"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Block"
+                        value={field.value || selectedBlock}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSelectedBlock(e.target.value);
+                          setSelectedGP(''); // Reset GP when block changes
+                        }}
+                        disabled={submitting || !locationData}
+                      >
+                        <MenuItem value="">Select Block</MenuItem>
+                        {locationData?.blocks?.map((block: any) => (
+                          <MenuItem key={block.name} value={block.name}>
+                            {block.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ width: { xs: '100%', sm: '48%' } }}>
+                  <Controller
+                    name="gramPanchayat"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Gram Panchayat"
+                        value={field.value || selectedGP}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSelectedGP(e.target.value);
+                        }}
+                        disabled={submitting || !selectedBlock}
+                      >
+                        <MenuItem value="">Select Gram Panchayat</MenuItem>
+                        {locationData?.blocks
+                          ?.find((b: any) => b.name === selectedBlock)
+                          ?.gramPanchayats?.map((gp: any) => (
+                            <MenuItem key={gp.name} value={gp.name}>
+                              {gp.name}
+                            </MenuItem>
+                          ))}
+                      </TextField>
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ width: '100%' }}>
+                  <Controller
+                    name="village"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Village"
+                        disabled={submitting || !selectedGP}
+                      >
+                        <MenuItem value="">Select Village</MenuItem>
+                        {locationData?.blocks
+                          ?.find((b: any) => b.name === selectedBlock)
+                          ?.gramPanchayats
+                          ?.find((gp: any) => gp.name === selectedGP)
+                          ?.villages?.map((village: string) => (
+                            <MenuItem key={village} value={village}>
+                              {village}
+                            </MenuItem>
+                          ))}
+                      </TextField>
                     )}
                   />
                 </Box>

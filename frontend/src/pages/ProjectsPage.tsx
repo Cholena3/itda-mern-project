@@ -512,7 +512,7 @@ const ProjectsPage: React.FC = () => {
                         disabled={submitting || !locationData}
                       >
                         <MenuItem value="">Select Block</MenuItem>
-                        {locationData?.districts?.[0]?.blocks?.map((block: any) => (
+                        {locationData?.blocks?.map((block: any) => (
                           <MenuItem key={block.name} value={block.name}>
                             {block.name}
                           </MenuItem>
@@ -540,7 +540,7 @@ const ProjectsPage: React.FC = () => {
                         disabled={submitting || !selectedBlock}
                       >
                         <MenuItem value="">Select Gram Panchayat</MenuItem>
-                        {locationData?.districts?.[0]?.blocks
+                        {locationData?.blocks
                           ?.find((b: any) => b.name === selectedBlock)
                           ?.gramPanchayats?.map((gp: any) => (
                             <MenuItem key={gp.name} value={gp.name}>
@@ -565,7 +565,7 @@ const ProjectsPage: React.FC = () => {
                         disabled={submitting || !selectedGP}
                       >
                         <MenuItem value="">Select Village</MenuItem>
-                        {locationData?.districts?.[0]?.blocks
+                        {locationData?.blocks
                           ?.find((b: any) => b.name === selectedBlock)
                           ?.gramPanchayats
                           ?.find((gp: any) => gp.name === selectedGP)
