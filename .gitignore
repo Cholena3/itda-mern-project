@@ -66,4 +66,5 @@ logs/
 # Package manager locks (keep one)
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml
+# pnpm-lock.yamlitda-backup/
+itda-mern-project/

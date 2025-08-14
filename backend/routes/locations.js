@@ -100,11 +100,13 @@ const parlakhemundiLocations = {
   ]
 };
 
-// Get location hierarchy data
+// Get location hierarchy data - No auth required for public data
 router.get('/hierarchy', async (req, res) => {
   try {
+    console.log('Location hierarchy requested');
     res.json(parlakhemundiLocations);
   } catch (error) {
+    console.error('Location hierarchy error:', error);
     res.status(500).json({ message: error.message });
   }
 });

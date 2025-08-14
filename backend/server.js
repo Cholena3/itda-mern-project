@@ -159,15 +159,16 @@ const connectDB = async () => {
   }
 };
 
-// Connect to databases
+// Connect to MongoDB
 connectDB();
 
-// Connect to Redis
-redis.connect().then(() => {
-  console.log('Redis connected successfully');
-}).catch(err => {
-  console.error('Redis connection error:', err);
-  // Continue without Redis (degraded mode)
+// Redis connection event handlers
+redis.on('error', (err) => {
+  securityLogger.error('Redis error:', err);
+});
+
+redis.on('connect', () => {
+  console.log('Redis connected');
 });
 
 // API Routes with caching and security
@@ -206,7 +207,6 @@ app.use('/api/dashboard',
 );
 
 app.use('/api/locations',
-  cacheStrategies.custom(600),
   require('./routes/locations')
 );
 
@@ -217,11 +217,10 @@ app.use('/api/ai',
   require('./routes/ai')
 );
 
-// Search routes
+// Search routes - No caching for real-time results
 app.use('/api/search',
   rateLimiters.general,
   auditLog('SEARCH'),
-  cacheStrategies.custom(300),
   require('./routes/search')
 );
 
@@ -232,32 +231,35 @@ app.use('/api/monitoring',
   require('./routes/monitoring')
 );
 
-// Serve static files and handle React routing
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from React build
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-  
-  // The "catchall" handler: for any request that doesn't
-  // match an API route, send back React's index.html file.
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api/')) {
-      res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-    } else {
-      res.status(404).json({ error: 'API route not found' });
-    }
-  });
-} else {
-  // In development, only handle API 404s
-  app.use((req, res) => {
-    if (req.path.startsWith('/api/')) {
-      res.status(404).json({ error: 'API route not found' });
-    } else {
-      res.status(404).json({ 
-        error: 'This route should be handled by React dev server on port 3000' 
-      });
-    }
-  });
-}
+// IMPORTANT: Serve React app - This MUST be LAST after all API routes
+// In production, serve the built React app
+const frontendBuildPath = path.join(__dirname, '../frontend/build');
+console.log('Frontend build path:', frontendBuildPath);
+
+// Serve static files from React build
+app.use(express.static(frontendBuildPath));
+
+// Catch all handler - MUST be last!
+// Send React's index.html for all non-API routes
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    const indexPath = path.join(frontendBuildPath, 'index.html');
+    console.log('Serving index.html for:', req.path);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(404).json({ 
+          error: 'Frontend not found. Please ensure the React app is built.',
+          path: indexPath
+        });
+      }
+    });
+  } else {
+    // API route not found
+    res.status(404).json({ error: 'API endpoint not found' });
+  }
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -291,10 +293,12 @@ process.on('SIGTERM', async () => {
 });
 
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('Security features: Enabled');
-  console.log('Redis caching: Enabled');
-  console.log('WebSocket: Enabled');
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`API URL: http://localhost:${PORT}/api`);
+  console.log(`Frontend served from: ${frontendBuildPath}`);
 });
+
+module.exports = app;
