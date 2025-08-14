@@ -224,6 +224,9 @@ app.use('/api/search',
   require('./routes/search')
 );
 
+// Test routes
+app.use('/api/test', require('./routes/test'));
+
 // Monitoring routes
 app.use('/api/monitoring',
   rateLimiters.strict,
