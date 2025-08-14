@@ -29,6 +29,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { Project, CreateProjectData, Scheme, StatusOptions } from '../types';
 import { projectsAPI, schemesAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
+import { API_URL } from '../config/api.config';
 
 interface ProjectFormData extends CreateProjectData {}
 
@@ -45,6 +47,9 @@ const ProjectsPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [locationData, setLocationData] = useState<any>(null);
+  const [selectedBlock, setSelectedBlock] = useState('');
+  const [selectedGP, setSelectedGP] = useState('');
 
   const {
     control,
@@ -89,11 +94,26 @@ const ProjectsPage: React.FC = () => {
   useEffect(() => {
     fetchProjects();
     fetchSchemes();
+    fetchLocationHierarchy();
   }, []);
+
+  const fetchLocationHierarchy = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/locations/hierarchy`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setLocationData(response.data);
+    } catch (error) {
+      console.error('Error fetching location data:', error);
+    }
+  };
 
   const handleOpenDialog = (project?: Project) => {
     if (project) {
       setEditingProject(project);
+      setSelectedBlock(project.block || '');
+      setSelectedGP(project.gramPanchayat || '');
       reset({
         name: project.name || '',
         description: project.description || '',
@@ -102,9 +122,14 @@ const ProjectsPage: React.FC = () => {
         startDate: project.startDate ? project.startDate.split('T')[0] : '',
         endDate: project.endDate ? project.endDate.split('T')[0] : '',
         status: project.status || 'Planning',
+        block: project.block || '',
+        gramPanchayat: project.gramPanchayat || '',
+        village: project.village || '',
       });
     } else {
       setEditingProject(null);
+      setSelectedBlock('');
+      setSelectedGP('');
       reset({
         name: '',
         description: '',
@@ -113,6 +138,9 @@ const ProjectsPage: React.FC = () => {
         startDate: '',
         endDate: '',
         status: 'Planning',
+        block: '',
+        gramPanchayat: '',
+        village: '',
       });
     }
     setDialogOpen(true);
@@ -121,6 +149,8 @@ const ProjectsPage: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingProject(null);
+    setSelectedBlock('');
+    setSelectedGP('');
     reset();
   };
 
@@ -455,6 +485,96 @@ const ProjectsPage: React.FC = () => {
                         helperText={errors.endDate?.message}
                         disabled={submitting}
                       />
+                    )}
+                  />
+                </Box>
+              </Box>
+
+              {/* Location Fields */}
+              <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Location Details</Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ width: { xs: '100%', sm: '48%' } }}>
+                  <Controller
+                    name="block"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Block"
+                        value={field.value || selectedBlock}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSelectedBlock(e.target.value);
+                          setSelectedGP(''); // Reset GP when block changes
+                        }}
+                        disabled={submitting || !locationData}
+                      >
+                        <MenuItem value="">Select Block</MenuItem>
+                        {locationData?.districts?.[0]?.blocks?.map((block: any) => (
+                          <MenuItem key={block.name} value={block.name}>
+                            {block.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ width: { xs: '100%', sm: '48%' } }}>
+                  <Controller
+                    name="gramPanchayat"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Gram Panchayat"
+                        value={field.value || selectedGP}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setSelectedGP(e.target.value);
+                        }}
+                        disabled={submitting || !selectedBlock}
+                      >
+                        <MenuItem value="">Select Gram Panchayat</MenuItem>
+                        {locationData?.districts?.[0]?.blocks
+                          ?.find((b: any) => b.name === selectedBlock)
+                          ?.gramPanchayats?.map((gp: any) => (
+                            <MenuItem key={gp.name} value={gp.name}>
+                              {gp.name}
+                            </MenuItem>
+                          ))}
+                      </TextField>
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ width: '100%' }}>
+                  <Controller
+                    name="village"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        select
+                        fullWidth
+                        label="Village"
+                        disabled={submitting || !selectedGP}
+                      >
+                        <MenuItem value="">Select Village</MenuItem>
+                        {locationData?.districts?.[0]?.blocks
+                          ?.find((b: any) => b.name === selectedBlock)
+                          ?.gramPanchayats
+                          ?.find((gp: any) => gp.name === selectedGP)
+                          ?.villages?.map((village: string) => (
+                            <MenuItem key={village} value={village}>
+                              {village}
+                            </MenuItem>
+                          ))}
+                      </TextField>
                     )}
                   />
                 </Box>

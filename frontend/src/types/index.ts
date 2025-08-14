@@ -66,6 +66,10 @@ export interface Project {
   startDate: string;
   endDate: string;
   status: 'Planning' | 'Active' | 'Completed' | 'On Hold';
+  district?: string;
+  block?: string;
+  gramPanchayat?: string;
+  village?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -78,6 +82,10 @@ export interface CreateProjectData {
   startDate: string;
   endDate: string;
   status?: 'Planning' | 'Active' | 'Completed' | 'On Hold';
+  district?: string;
+  block?: string;
+  gramPanchayat?: string;
+  village?: string;
 }
 
 // Work types
@@ -94,6 +102,10 @@ export interface Work {
   endDate: string;
   status: 'Planning' | 'Active' | 'Completed' | 'On Hold';
   progress: number;
+  district?: string;
+  block?: string;
+  gramPanchayat?: string;
+  village?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -108,6 +120,10 @@ export interface CreateWorkData {
   endDate: string;
   status?: 'Planning' | 'Active' | 'Completed' | 'On Hold';
   progress?: number;
+  district?: string;
+  block?: string;
+  gramPanchayat?: string;
+  village?: string;
 }
 
 // Dashboard types

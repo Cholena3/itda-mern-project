@@ -31,6 +31,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { Work, CreateWorkData, Scheme, Project, StatusOptions } from '../types';
 import { worksAPI, schemesAPI, projectsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
+import { API_URL } from '../config/api.config';
 
 interface WorkFormData extends CreateWorkData {}
 
@@ -50,6 +52,9 @@ const WorksPage: React.FC = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [workToDelete, setWorkToDelete] = useState<Work | null>(null);
   const [selectedSchemeId, setSelectedSchemeId] = useState<string>('');
+  const [locationData, setLocationData] = useState<any>(null);
+  const [selectedBlock, setSelectedBlock] = useState('');
+  const [selectedGP, setSelectedGP] = useState('');
 
   const {
     control,
@@ -107,7 +112,20 @@ const WorksPage: React.FC = () => {
     fetchWorks();
     fetchSchemes();
     fetchProjects();
+    fetchLocationHierarchy();
   }, []);
+
+  const fetchLocationHierarchy = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/locations/hierarchy`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setLocationData(response.data);
+    } catch (error) {
+      console.error('Error fetching location data:', error);
+    }
+  };
 
   // Filter projects based on selected scheme
   useEffect(() => {
