@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { toast } from 'react-hot-toast';
+import { SOCKET_URL } from '../config/api.config';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -45,11 +46,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return;
     }
 
-    // Remove /api from the URL for WebSocket connection
-    const socketUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000').replace('/api', '');
-    console.log('Connecting to WebSocket at:', socketUrl);
+    console.log('Connecting to WebSocket at:', SOCKET_URL);
     
-    const newSocket = io(socketUrl, {
+    const newSocket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,

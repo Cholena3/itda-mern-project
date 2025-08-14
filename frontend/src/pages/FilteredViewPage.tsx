@@ -33,6 +33,7 @@ import {
   Clear
 } from '@mui/icons-material';
 import axios from 'axios';
+import { API_URL } from '../config/api.config';
 
 interface LocationHierarchy {
   district: string;
@@ -70,9 +71,8 @@ const FilteredViewPage: React.FC = () => {
 
   const fetchLocationHierarchy = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      console.log('Fetching location hierarchy from:', `${apiUrl}/api/locations/hierarchy`);
-      const response = await axios.get(`${apiUrl}/api/locations/hierarchy`);
+      console.log('Fetching location hierarchy from:', `${API_URL}/locations/hierarchy`);
+      const response = await axios.get(`${API_URL}/locations/hierarchy`);
       console.log('Location data received:', response.data);
       setLocationData(response.data);
     } catch (error) {
@@ -149,7 +149,7 @@ const FilteredViewPage: React.FC = () => {
   const handleFilter = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/locations/filter`, {
+      const response = await axios.post(`${API_URL}/locations/filter`, {
         district: 'Gajapati (Parlakhemundi)',
         block: selectedBlock || undefined,
         gramPanchayat: selectedGP || undefined,

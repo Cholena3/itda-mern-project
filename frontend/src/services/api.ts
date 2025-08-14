@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { API_URL } from '../config/api.config';
 import {
   AuthResponse,
   LoginData,
@@ -14,9 +15,6 @@ import {
   ApiResponse,
   PaginatedResponse
 } from '../types';
-
-// Create axios instance with base configuration
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,

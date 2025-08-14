@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config/api.config';
 import {
   Box,
   Paper,
@@ -79,7 +80,7 @@ const AdvancedSearch: React.FC = () => {
 
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/search/suggestions`,
+          `${API_URL}/search/suggestions`,
           {
             params: { q: query },
             headers: {
@@ -111,7 +112,7 @@ const AdvancedSearch: React.FC = () => {
         : '/api/search/advanced';
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${endpoint}`,
+        `${API_URL}${endpoint.replace('/api', '')}`,
         {
           query,
           filters,
