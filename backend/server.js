@@ -234,34 +234,22 @@ app.use('/api/monitoring',
   require('./routes/monitoring')
 );
 
-// IMPORTANT: Serve React app - This MUST be LAST after all API routes
-// In production, serve the built React app
-const frontendBuildPath = path.join(__dirname, '../frontend/build');
-console.log('Frontend build path:', frontendBuildPath);
+// API 404 handler - for unmatched API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
 
-// Serve static files from React build
-app.use(express.static(frontendBuildPath));
-
-// Catch all handler - MUST be last!
-// Send React's index.html for all non-API routes
-app.get('*', (req, res) => {
-  // Only serve index.html for non-API routes
-  if (!req.path.startsWith('/api/')) {
-    const indexPath = path.join(frontendBuildPath, 'index.html');
-    console.log('Serving index.html for:', req.path);
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        console.error('Error serving index.html:', err);
-        res.status(404).json({ 
-          error: 'Frontend not found. Please ensure the React app is built.',
-          path: indexPath
-        });
-      }
-    });
-  } else {
-    // API route not found
-    res.status(404).json({ error: 'API endpoint not found' });
-  }
+// Root route for backend health check
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'ITDA Backend API Server',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      docs: '/api-docs'
+    }
+  });
 });
 
 // Global error handler
@@ -298,10 +286,10 @@ process.on('SIGTERM', async () => {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV}`);
+  console.log(`Backend server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`API URL: http://localhost:${PORT}/api`);
-  console.log(`Frontend served from: ${frontendBuildPath}`);
+  console.log(`CORS enabled for: https://itda-frontend.onrender.com`);
 });
 
 module.exports = app;

@@ -216,6 +216,8 @@ const corsOptions = {
             'http://localhost:3000', 
             'http://localhost:5000',
             'https://itda-frontend.onrender.com',
+            'https://itda-backend.onrender.com',
+            'https://itda-frontend.onrender.com',
             'https://itda-mern-project.onrender.com',
             // Add any other potential Render URLs
           ];

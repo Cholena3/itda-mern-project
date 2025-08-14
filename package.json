@@ -4,13 +4,12 @@
   "description": "ITDA Project Management System - MERN Stack",
   "main": "server.js",
   "scripts": {
-    "start": "NODE_ENV=production node backend/server.js",
+    "start": "node backend/server.js",
     "server": "nodemon backend/server.js",
     "client": "cd frontend && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "build": "cd frontend && npm install && npm run build",
-    "install-all": "npm install && cd frontend && npm install",
-    "heroku-postbuild": "NODE_ENV=production npm run build"
+    "build": "echo 'Backend only - no build needed'",
+    "install-all": "npm install && cd frontend && npm install"
   },
   "keywords": [
     "project-management",
