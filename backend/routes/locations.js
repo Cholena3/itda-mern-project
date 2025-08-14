@@ -144,12 +144,16 @@ router.post('/filter', async (req, res) => {
   try {
     const { district, block, gramPanchayat, village, dataType } = req.body;
     
+    console.log('Filter request received:', { district, block, gramPanchayat, village, dataType });
+    
     // Build filter query
     const locationFilter = {};
     if (district) locationFilter.district = district;
     if (block) locationFilter.block = block;
     if (gramPanchayat) locationFilter.gramPanchayat = gramPanchayat;
     if (village) locationFilter.village = village;
+    
+    console.log('Location filter built:', locationFilter);
     
     let results = {};
     
@@ -195,6 +199,12 @@ router.post('/filter', async (req, res) => {
       totalProjects: results.projects?.length || 0,
       totalWorks: results.works?.length || 0
     };
+    
+    console.log('Filter results summary:', {
+      schemes: results.schemes?.length || 0,
+      projects: results.projects?.length || 0,
+      works: results.works?.length || 0
+    });
     
     res.json(results);
   } catch (error) {
