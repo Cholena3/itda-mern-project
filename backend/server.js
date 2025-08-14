@@ -230,27 +230,18 @@ app.use('/api/monitoring',
   require('./routes/monitoring')
 );
 
-// Serve React app for any route not handled by API
-// This must come after all API routes
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-  
-  app.get('*', (req, res) => {
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: 'API route not found' });
+  } else {
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-  });
-} else {
-  // 404 handler for API routes in development
-  app.use((req, res) => {
-    if (req.path.startsWith('/api/')) {
-      res.status(404).json({ error: 'API route not found' });
-    } else {
-      // In development, frontend is served by React dev server
-      res.status(404).json({ 
-        error: 'Route not found. In development, frontend routes are handled by React dev server on port 3000' 
-      });
-    }
-  });
-}
+  }
+});
 
 // Global error handler
 app.use((err, req, res, next) => {

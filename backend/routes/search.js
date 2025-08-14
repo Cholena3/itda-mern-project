@@ -9,49 +9,57 @@ const Work = require('../models/Work');
 // Advanced search endpoint
 router.post('/advanced', auth, async (req, res) => {
   try {
-    const { query, filters } = req.body;
+    const { query, filters = {} } = req.body;
     
-    // Build MongoDB query with filters
-    const mongoQuery = {};
+    // Build separate queries for each collection type
+    const projectQuery = {};
+    const schemeQuery = {};
+    const workQuery = {};
     
     // Add text search if query provided
     if (query && query.trim()) {
       const searchRegex = new RegExp(query, 'i');
-      mongoQuery.$or = [
-        { name: searchRegex },
-        { description: searchRegex }
-      ];
-    }
-    
-    // Apply filters
-    const filterQuery = {};
-    if (filters.status && filters.status !== '') {
-      filterQuery.status = filters.status;
-    }
-    if (filters.category && filters.category !== '') {
-      filterQuery.category = filters.category;
-    }
-    if (filters.type && filters.type !== '') {
-      filterQuery.type = filters.type;
-    }
-    if (filters.progressMin !== undefined && filters.progressMin > 0) {
-      filterQuery.progress = { $gte: filters.progressMin };
-    }
-    if (filters.budgetRange && filters.budgetRange.length === 2) {
-      filterQuery.budget = { 
-        $gte: filters.budgetRange[0], 
-        $lte: filters.budgetRange[1] 
+      const textSearch = {
+        $or: [
+          { name: searchRegex },
+          { description: searchRegex }
+        ]
       };
+      Object.assign(projectQuery, textSearch);
+      Object.assign(schemeQuery, textSearch);
+      Object.assign(workQuery, textSearch);
     }
     
-    // Combine query and filters
-    const finalQuery = { ...mongoQuery, ...filterQuery };
+    // Apply status filter
+    if (filters && filters.status && filters.status !== '') {
+      projectQuery.status = filters.status;
+      schemeQuery.status = filters.status;
+      workQuery.status = filters.status;
+    }
+    
+    // Apply progress filter (only for works)
+    if (filters && filters.progressMin !== undefined && filters.progressMin > 0) {
+      workQuery.progress = { $gte: filters.progressMin };
+    }
+    
+    // Apply budget filter
+    if (filters && filters.budgetRange && filters.budgetRange.length === 2) {
+      const budgetFilter = { 
+        budget: {
+          $gte: filters.budgetRange[0], 
+          $lte: filters.budgetRange[1] 
+        }
+      };
+      Object.assign(projectQuery, budgetFilter);
+      Object.assign(schemeQuery, budgetFilter);
+      Object.assign(workQuery, budgetFilter);
+    }
       
-      // Search in MongoDB with filters
+      // Search in MongoDB with proper queries for each type
       const [projects, schemes, works] = await Promise.all([
-        Project.find(finalQuery).limit(20),
-        Scheme.find(finalQuery).limit(20),
-        Work.find(finalQuery).limit(20)
+        Project.find(projectQuery).limit(20),
+        Scheme.find(schemeQuery).limit(20),
+        Work.find(workQuery).limit(20)
       ]);
       
       const combinedResults = [
@@ -93,6 +101,7 @@ router.post('/advanced', auth, async (req, res) => {
         }))
       ];
       
+      // Always return results even if empty
       res.json({ 
         results: combinedResults,
         total: combinedResults.length,
@@ -104,7 +113,8 @@ router.post('/advanced', auth, async (req, res) => {
       });
   } catch (error) {
     console.error('Advanced search error:', error);
-    res.status(500).json({ error: 'Search failed', results: [] });
+    // Return empty results instead of error to prevent frontend issues
+    res.json({ results: [], total: 0, facets: { status: [], categories: [], types: [] } });
   }
 });
 
