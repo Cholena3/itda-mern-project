@@ -71,8 +71,11 @@ const FilteredViewPage: React.FC = () => {
 
   const fetchLocationHierarchy = async () => {
     try {
+      const token = localStorage.getItem('token');
       console.log('Fetching location hierarchy from:', `${API_URL}/locations/hierarchy`);
-      const response = await axios.get(`${API_URL}/locations/hierarchy`);
+      const response = await axios.get(`${API_URL}/locations/hierarchy`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       console.log('Location data received:', response.data);
       setLocationData(response.data);
     } catch (error) {
@@ -149,12 +152,15 @@ const FilteredViewPage: React.FC = () => {
   const handleFilter = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.post(`${API_URL}/locations/filter`, {
         district: 'Gajapati (Parlakhemundi)',
         block: selectedBlock || undefined,
         gramPanchayat: selectedGP || undefined,
         village: selectedVillage || undefined,
         dataType
+      }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       setFilteredData(response.data);
       

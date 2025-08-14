@@ -56,6 +56,17 @@ class SocketService {
       // Join role-based room
       socket.join(`role:${socket.userRole}`);
 
+      // Broadcast online users to all connected clients
+      this.io.emit('users:online', this.getOnlineUsers());
+      
+      // Notify others about new online user
+      socket.broadcast.emit('user:online', socket.userId);
+
+      // Handle request for online users
+      socket.on('get:online-users', () => {
+        socket.emit('users:online', this.getOnlineUsers());
+      });
+
       // Handle joining project rooms
       socket.on('join:project', async (projectId) => {
         try {
@@ -144,6 +155,9 @@ class SocketService {
 
         // Notify others about disconnection
         this.io.emit('user:offline', { userId: socket.userId });
+        
+        // Broadcast updated online users list
+        this.io.emit('users:online', this.getOnlineUsers());
       });
     });
   }
