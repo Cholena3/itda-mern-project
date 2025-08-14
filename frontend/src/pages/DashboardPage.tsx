@@ -61,26 +61,15 @@ const DashboardPage: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // Add timeout handling
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-        
         const data = await dashboardAPI.getStats();
-        clearTimeout(timeoutId);
         
-        // Check if data is partial/error response
-        if (data.partial) {
-          setError('Some dashboard data could not be loaded. Showing available information.');
+        if (data) {
+          setStats(data);
         }
-        
-        setStats(data);
       } catch (err: any) {
-        if (err.name === 'AbortError') {
-          setError('Dashboard is taking longer than expected to load. Please refresh the page.');
-        } else {
-          setError(err.message || 'Failed to fetch dashboard statistics');
-        }
-        // Set empty stats to prevent crashes
+        console.error('Dashboard error:', err);
+        setError('Unable to load dashboard data. Please refresh the page.');
+        // Set default data to prevent crashes
         setStats({
           totalSchemes: 0,
           totalProjects: 0,

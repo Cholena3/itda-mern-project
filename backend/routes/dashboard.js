@@ -6,51 +6,41 @@ const Work = require('../models/Work');
 
 router.get('/stats', async (req, res) => {
   try {
-    // Use Promise.all for parallel execution with individual error handling
-    const [schemeStats, projectStats, workStats, budgetStats] = await Promise.allSettled([
-      // Scheme statistics
-      Promise.all([
-        Scheme.countDocuments(),
-        Scheme.countDocuments({ status: 'Active' })
-      ]),
-      // Project statistics
-      Promise.all([
-        Project.countDocuments(),
-        Project.countDocuments({ status: 'Active' })
-      ]),
-      // Work statistics
-      Promise.all([
-        Work.countDocuments(),
-        Work.countDocuments({ status: 'Active' }),
-        Work.countDocuments({ status: 'Completed' })
-      ]),
-      // Budget calculation
-      Project.aggregate([
-        { $group: { _id: null, total: { $sum: '$budget' } } }
-      ])
+    // Basic counts - fast queries
+    const [
+      totalSchemes,
+      activeSchemes,
+      totalProjects,
+      activeProjects,
+      totalWorks,
+      activeWorks,
+      completedWorks
+    ] = await Promise.all([
+      Scheme.countDocuments(),
+      Scheme.countDocuments({ status: 'Active' }),
+      Project.countDocuments(),
+      Project.countDocuments({ status: 'Active' }),
+      Work.countDocuments(),
+      Work.countDocuments({ status: 'Active' }),
+      Work.countDocuments({ status: 'Completed' })
     ]);
-    
-    // Extract values with fallbacks
-    const totalSchemes = schemeStats.status === 'fulfilled' ? schemeStats.value[0] : 0;
-    const activeSchemes = schemeStats.status === 'fulfilled' ? schemeStats.value[1] : 0;
-    
-    const totalProjects = projectStats.status === 'fulfilled' ? projectStats.value[0] : 0;
-    const activeProjects = projectStats.status === 'fulfilled' ? projectStats.value[1] : 0;
-    
-    const totalWorks = workStats.status === 'fulfilled' ? workStats.value[0] : 0;
-    const activeWorks = workStats.status === 'fulfilled' ? workStats.value[1] : 0;
-    const completedWorks = workStats.status === 'fulfilled' ? workStats.value[2] : 0;
-    
-    const totalBudgetResult = budgetStats.status === 'fulfilled' ? budgetStats.value : [];
-    
-    // Skip heavy operations for now - return empty arrays
-    const recentSchemes = [];
-    const recentProjects = [];
-    const recentWorks = [];
-    
-    // Combine and format recent activity
+
+    // Calculate total budget - single aggregation
+    const totalBudgetResult = await Project.aggregate([
+      { $group: { _id: null, total: { $sum: '$budget' } } }
+    ]).exec();
+
+    // Get recent activity - simplified
     const recentActivity = [];
     
+    // Get limited recent items
+    const [recentSchemes, recentProjects, recentWorks] = await Promise.all([
+      Scheme.find().sort('-createdAt').limit(3).select('name createdAt'),
+      Project.find().sort('-createdAt').limit(3).select('name createdAt'),
+      Work.find().sort('-createdAt').limit(4).select('name createdAt status')
+    ]);
+
+    // Format recent activity
     recentSchemes.forEach(scheme => {
       recentActivity.push({
         _id: scheme._id,
@@ -60,7 +50,7 @@ router.get('/stats', async (req, res) => {
         date: scheme.createdAt
       });
     });
-    
+
     recentProjects.forEach(project => {
       recentActivity.push({
         _id: project._id,
@@ -70,7 +60,7 @@ router.get('/stats', async (req, res) => {
         date: project.createdAt
       });
     });
-    
+
     recentWorks.forEach(work => {
       recentActivity.push({
         _id: work._id,
@@ -80,18 +70,60 @@ router.get('/stats', async (req, res) => {
         date: work.createdAt
       });
     });
-    
-    // Sort recent activity by date
+
+    // Sort by date
     recentActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Return empty arrays for aggregations to avoid timeout
-    const schemeBudgets = [];
-    const workStatusDistribution = [];
-    const progressDistribution = [];
-    const budgetVsExpenditure = [];
-    const topSchemesByBudget = [];
+    // Get scheme budgets for chart - limit to top 5
+    const schemeBudgets = await Scheme.find()
+      .sort('-budget')
+      .limit(5)
+      .select('name budget');
 
-    // Send immediate response
+    // Get work status distribution
+    const workStatusDistribution = await Work.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]).exec();
+
+    // Get simplified progress distribution
+    const progressDistribution = await Work.aggregate([
+      {
+        $match: { status: 'Active' }
+      },
+      {
+        $bucket: {
+          groupBy: '$progress',
+          boundaries: [0, 25, 50, 75, 100],
+          default: 'Other',
+          output: {
+            count: { $sum: 1 }
+          }
+        }
+      }
+    ]).exec();
+
+    // Get budget vs expenditure
+    const budgetVsExpenditure = await Work.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalBudget: { $sum: '$budget' },
+          totalSpent: { $sum: { $ifNull: ['$amountSpent', 0] } }
+        }
+      }
+    ]).exec();
+
+    // Top schemes by budget
+    const topSchemesByBudget = await Scheme.find()
+      .sort('-budget')
+      .limit(5)
+      .select('name budget status');
+
     res.json({
       totalSchemes,
       totalProjects,
@@ -102,7 +134,11 @@ router.get('/stats', async (req, res) => {
       activeWorks,
       completedWorks,
       recentActivity: recentActivity.slice(0, 10),
-      schemeBudgets,
+      schemeBudgets: schemeBudgets.map(s => ({
+        name: s.name,
+        schemeBudget: s.budget,
+        projectsBudget: s.budget
+      })),
       workStatusDistribution,
       progressDistribution,
       budgetVsExpenditure: budgetVsExpenditure[0] || { totalBudget: 0, totalSpent: 0 },
@@ -110,7 +146,7 @@ router.get('/stats', async (req, res) => {
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);
-    // Always return success with empty data to prevent frontend errors
+    // Return partial data on error
     res.json({
       totalSchemes: 0,
       totalProjects: 0,

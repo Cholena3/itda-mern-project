@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const searchService = require('../services/searchService');
 const Project = require('../models/Project');
 const Scheme = require('../models/Scheme');
 const Work = require('../models/Work');
@@ -9,146 +8,185 @@ const Work = require('../models/Work');
 // Advanced search endpoint
 router.post('/advanced', auth, async (req, res) => {
   try {
-    const { query, filters = {} } = req.body;
+    const { query = '', filters = {} } = req.body;
     
-    // Build separate queries for each collection type
-    const projectQuery = {};
-    const schemeQuery = {};
-    const workQuery = {};
+    console.log('Search request:', { query, filters });
     
-    // Add text search if query provided
-    if (query && query.trim()) {
-      const searchRegex = new RegExp(query, 'i');
-      const textSearch = {
-        $or: [
-          { name: searchRegex },
-          { description: searchRegex }
-        ]
-      };
-      Object.assign(projectQuery, textSearch);
-      Object.assign(schemeQuery, textSearch);
-      Object.assign(workQuery, textSearch);
-    }
+    // Initialize empty results
+    let projects = [];
+    let schemes = [];
+    let works = [];
     
-    // Apply status filter
-    if (filters && filters.status && filters.status !== '') {
-      projectQuery.status = filters.status;
-      schemeQuery.status = filters.status;
-      workQuery.status = filters.status;
-    }
+    // Build search criteria
+    const searchCriteria = {};
     
-    // Apply progress filter (only for works)
-    if (filters && filters.progressMin !== undefined && filters.progressMin > 0) {
-      workQuery.progress = { $gte: filters.progressMin };
-    }
-    
-    // Apply budget filter
-    if (filters && filters.budgetRange && filters.budgetRange.length === 2) {
-      const budgetFilter = { 
-        budget: {
-          $gte: filters.budgetRange[0], 
-          $lte: filters.budgetRange[1] 
-        }
-      };
-      Object.assign(projectQuery, budgetFilter);
-      Object.assign(schemeQuery, budgetFilter);
-      Object.assign(workQuery, budgetFilter);
-    }
-      
-      // Search in MongoDB with proper queries for each type
-      const [projects, schemes, works] = await Promise.all([
-        Project.find(projectQuery).limit(20),
-        Scheme.find(schemeQuery).limit(20),
-        Work.find(workQuery).limit(20)
-      ]);
-      
-      const combinedResults = [
-        ...projects.map(p => ({
-          id: p._id,
-          title: p.name,
-          type: 'project',
-          description: p.description || '',
-          score: 0.9,
-          tags: ['project', p.scheme_id?.name || 'scheme'].filter(Boolean),
-          metrics: {
-            progress: p.progress || 0,
-            budget: p.budget || 0,
-            location: p.location || ''
-          }
-        })),
-        ...schemes.map(s => ({
-          id: s._id,
-          title: s.name,
-          type: 'scheme',
-          description: s.description || '',
-          score: 0.85,
-          tags: ['scheme'],
-          metrics: {
-            budget: s.budget || 0
-          }
-        })),
-        ...works.map(w => ({
-          id: w._id,
-          title: w.name,
-          type: 'work',
-          description: w.description || '',
-          score: 0.8,
-          tags: ['work', w.status || 'active'].filter(Boolean),
-          metrics: {
-            progress: w.progress || 0,
-            budget: w.budget || 0
-          }
-        }))
+    // Add text search only if query is provided
+    if (query && query.trim() !== '') {
+      const searchRegex = new RegExp(query.trim(), 'i');
+      searchCriteria.$or = [
+        { name: searchRegex },
+        { description: searchRegex }
       ];
-      
-      // Always return results even if empty
-      res.json({ 
-        results: combinedResults,
-        total: combinedResults.length,
-        facets: {
-          status: [],
-          categories: [],
-          types: []
+    }
+    
+    // Add status filter if provided
+    if (filters.status && filters.status !== '') {
+      searchCriteria.status = filters.status;
+    }
+    
+    // Search in all collections
+    [projects, schemes, works] = await Promise.all([
+      Project.find(searchCriteria).limit(20).lean(),
+      Scheme.find(searchCriteria).limit(20).lean(),
+      Work.find(searchCriteria).limit(20).lean()
+    ]);
+    
+    // Apply additional filters for works (progress)
+    if (filters.progressMin !== undefined && filters.progressMin > 0) {
+      works = works.filter(w => w.progress >= filters.progressMin);
+    }
+    
+    // Apply budget filter if provided
+    if (filters.budgetRange && filters.budgetRange.length === 2) {
+      const [min, max] = filters.budgetRange;
+      projects = projects.filter(p => p.budget >= min && p.budget <= max);
+      schemes = schemes.filter(s => s.budget >= min && s.budget <= max);
+      works = works.filter(w => w.budget >= min && w.budget <= max);
+    }
+    
+    // Format results
+    const combinedResults = [
+      ...projects.map(p => ({
+        id: p._id,
+        title: p.name || 'Untitled Project',
+        type: 'project',
+        description: p.description || 'No description available',
+        score: 0.9,
+        tags: ['project'],
+        metrics: {
+          progress: p.progress || 0,
+          budget: p.budget || 0,
+          location: p.location || p.district || ''
         }
-      });
+      })),
+      ...schemes.map(s => ({
+        id: s._id,
+        title: s.name || 'Untitled Scheme',
+        type: 'scheme',
+        description: s.description || 'No description available',
+        score: 0.85,
+        tags: ['scheme'],
+        metrics: {
+          budget: s.budget || 0
+        }
+      })),
+      ...works.map(w => ({
+        id: w._id,
+        title: w.name || 'Untitled Work',
+        type: 'work',
+        description: w.description || 'No description available',
+        score: 0.8,
+        tags: ['work', w.status || 'Unknown'].filter(Boolean),
+        metrics: {
+          progress: w.progress || 0,
+          budget: w.budget || 0
+        }
+      }))
+    ];
+    
+    console.log(`Search found: ${combinedResults.length} results`);
+    
+    res.json({ 
+      results: combinedResults,
+      total: combinedResults.length,
+      facets: {
+        status: [],
+        categories: [],
+        types: []
+      }
+    });
   } catch (error) {
     console.error('Advanced search error:', error);
-    // Return empty results instead of error to prevent frontend issues
-    res.json({ results: [], total: 0, facets: { status: [], categories: [], types: [] } });
+    res.json({ 
+      results: [], 
+      total: 0, 
+      facets: { 
+        status: [], 
+        categories: [], 
+        types: [] 
+      } 
+    });
   }
 });
 
 // Natural language search endpoint
 router.post('/natural', auth, async (req, res) => {
   try {
-    const { query, filters } = req.body;
+    const { query = '', filters = {} } = req.body;
     
-    // Process natural language query
-    const processedQuery = await searchService.processNaturalLanguage(query);
+    // For natural language, just use the same search as advanced
+    // but with the query as-is
+    const searchRegex = new RegExp(query, 'i');
     
-    // Search with processed query
-    const results = await searchService.search(processedQuery, filters);
+    const [projects, schemes, works] = await Promise.all([
+      Project.find({ 
+        $or: [
+          { name: searchRegex },
+          { description: searchRegex }
+        ]
+      }).limit(10).lean(),
+      Scheme.find({ 
+        $or: [
+          { name: searchRegex },
+          { description: searchRegex }
+        ]
+      }).limit(10).lean(),
+      Work.find({ 
+        $or: [
+          { name: searchRegex },
+          { description: searchRegex }
+        ]
+      }).limit(10).lean()
+    ]);
+    
+    const results = [
+      ...projects.map(p => ({
+        id: p._id,
+        title: p.name || 'Untitled',
+        type: 'project',
+        description: p.description || '',
+        score: 0.9,
+        tags: ['project']
+      })),
+      ...schemes.map(s => ({
+        id: s._id,
+        title: s.name || 'Untitled',
+        type: 'scheme',
+        description: s.description || '',
+        score: 0.85,
+        tags: ['scheme']
+      })),
+      ...works.map(w => ({
+        id: w._id,
+        title: w.name || 'Untitled',
+        type: 'work',
+        description: w.description || '',
+        score: 0.8,
+        tags: ['work']
+      }))
+    ];
     
     res.json({ 
-      results: results || [],
-      interpretation: processedQuery,
+      results,
+      interpretation: query,
       confidence: 0.9
     });
   } catch (error) {
     console.error('Natural language search error:', error);
-    
-    // Fallback search
-    const searchRegex = new RegExp(req.body.query, 'i');
-    const projects = await Project.find({ name: searchRegex }).limit(10);
-    
     res.json({ 
-      results: projects.map(p => ({
-        id: p._id,
-        title: p.name,
-        type: 'project',
-        description: p.description || '',
-        score: 0.7
-      }))
+      results: [],
+      interpretation: '',
+      confidence: 0
     });
   }
 });
@@ -162,31 +200,24 @@ router.get('/suggestions', auth, async (req, res) => {
       return res.json({ suggestions: [] });
     }
     
-    // Get suggestions from search service
-    const suggestions = await searchService.getSuggestions(q);
+    // Get suggestions from database
+    const regex = new RegExp(`^${q}`, 'i');
     
-    if (!suggestions || suggestions.length === 0) {
-      // Fallback suggestions
-      const regex = new RegExp(`^${q}`, 'i');
-      
-      const [projects, schemes] = await Promise.all([
-        Project.find({ name: regex }).limit(3).select('name'),
-        Scheme.find({ name: regex }).limit(3).select('name')
-      ]);
-      
-      const fallbackSuggestions = [
-        ...projects.map(p => p.name),
-        ...schemes.map(s => s.name),
-        `${q} projects`,
-        `${q} schemes`,
-        `${q} in progress`,
-        `${q} completed`
-      ];
-      
-      res.json({ suggestions: fallbackSuggestions.slice(0, 5) });
-    } else {
-      res.json({ suggestions });
-    }
+    const [projects, schemes] = await Promise.all([
+      Project.find({ name: regex }).limit(3).select('name').lean(),
+      Scheme.find({ name: regex }).limit(3).select('name').lean()
+    ]);
+    
+    const suggestions = [
+      ...projects.map(p => p.name),
+      ...schemes.map(s => s.name),
+      `${q} projects`,
+      `${q} schemes`,
+      `${q} in progress`,
+      `${q} completed`
+    ].slice(0, 5);
+    
+    res.json({ suggestions });
   } catch (error) {
     console.error('Suggestions error:', error);
     res.json({ suggestions: [] });
@@ -196,26 +227,12 @@ router.get('/suggestions', auth, async (req, res) => {
 // Faceted search endpoint
 router.post('/facets', auth, async (req, res) => {
   try {
-    const { query } = req.body;
-    
-    // Get facets from search service or database
-    const [statusFacets, districtFacets, typeFacets] = await Promise.all([
-      Work.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } }
-      ]),
-      Project.aggregate([
-        { $group: { _id: '$district', count: { $sum: 1 } } }
-      ]),
-      Work.aggregate([
-        { $group: { _id: '$work_type', count: { $sum: 1 } } }
-      ])
-    ]);
-    
+    // Return empty facets for now to avoid timeout
     res.json({
       facets: {
-        status: statusFacets.map(f => ({ name: f._id || 'Unknown', count: f.count })),
-        districts: districtFacets.filter(f => f._id).map(f => ({ name: f._id, count: f.count })),
-        types: typeFacets.filter(f => f._id).map(f => ({ name: f._id, count: f.count }))
+        status: [],
+        districts: [],
+        types: []
       }
     });
   } catch (error) {

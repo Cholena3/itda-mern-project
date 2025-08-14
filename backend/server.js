@@ -125,8 +125,10 @@ const connectDB = async () => {
       await mongoose.connect(process.env.MONGODB_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 45000,
+        serverSelectionTimeoutMS: 10000,  // Reduced from 30s to 10s
+        socketTimeoutMS: 30000,  // Reduced from 45s to 30s
+        maxPoolSize: 10,
+        minPoolSize: 2
       });
       
       console.log('MongoDB connected successfully');
@@ -230,18 +232,32 @@ app.use('/api/monitoring',
   require('./routes/monitoring')
 );
 
-// Serve static files from React build
-app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-  // Don't serve index.html for API routes
-  if (req.path.startsWith('/api/')) {
-    res.status(404).json({ error: 'API route not found' });
-  } else {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-  }
-});
+// Serve static files and handle React routing
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from React build
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  // The "catchall" handler: for any request that doesn't
+  // match an API route, send back React's index.html file.
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api/')) {
+      res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+    } else {
+      res.status(404).json({ error: 'API route not found' });
+    }
+  });
+} else {
+  // In development, only handle API 404s
+  app.use((req, res) => {
+    if (req.path.startsWith('/api/')) {
+      res.status(404).json({ error: 'API route not found' });
+    } else {
+      res.status(404).json({ 
+        error: 'This route should be handled by React dev server on port 3000' 
+      });
+    }
+  });
+}
 
 // Global error handler
 app.use((err, req, res, next) => {
