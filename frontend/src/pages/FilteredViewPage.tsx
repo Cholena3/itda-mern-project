@@ -68,6 +68,32 @@ const FilteredViewPage: React.FC = () => {
   useEffect(() => {
     fetchLocationHierarchy();
   }, []);
+  
+  // Trigger initial filter when component mounts
+  useEffect(() => {
+    const initialFilter = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        console.log('Sending initial filter request');
+        const response = await axios.post(`${API_URL}/locations/filter`, {
+          district: 'Gajapati (Parlakhemundi)',
+          dataType: 'all'
+        }, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        
+        console.log('Initial filter response:', response.data);
+        setFilteredData(response.data);
+      } catch (error) {
+        console.error('Error in initial filter:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    initialFilter();
+  }, []);
 
   const fetchLocationHierarchy = async () => {
     try {
@@ -153,6 +179,15 @@ const FilteredViewPage: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('Sending filter request to:', `${API_URL}/locations/filter`);
+      console.log('Filter params:', {
+        district: 'Gajapati (Parlakhemundi)',
+        block: selectedBlock || undefined,
+        gramPanchayat: selectedGP || undefined,
+        village: selectedVillage || undefined,
+        dataType
+      });
+      
       const response = await axios.post(`${API_URL}/locations/filter`, {
         district: 'Gajapati (Parlakhemundi)',
         block: selectedBlock || undefined,
@@ -162,6 +197,8 @@ const FilteredViewPage: React.FC = () => {
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
+      
+      console.log('Filter response received:', response.data);
       setFilteredData(response.data);
       
       // Auto-select appropriate tab based on data
@@ -170,6 +207,10 @@ const FilteredViewPage: React.FC = () => {
       else if (response.data.works?.length > 0) setTabValue(2);
     } catch (error) {
       console.error('Error filtering data:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response data:', error.response?.data);
+        console.error('Response status:', error.response?.status);
+      }
     } finally {
       setLoading(false);
     }
