@@ -109,7 +109,7 @@ const LandingPage: React.FC = () => {
               </Avatar>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                  ITDA, Paralakhemundi
+                  ITDA Paralakhemundi
                 </Typography>
                 <Typography variant="caption" color="textSecondary">
                   Integrated Tribal Development Agency
