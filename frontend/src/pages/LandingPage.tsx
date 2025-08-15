@@ -368,11 +368,11 @@ const LandingPage: React.FC = () => {
                 <Chip
                   icon={<LocationOn />}
                   label="Paralakhemundi"
-                  sx={{ bgcolor: 'primary.light', color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
+                  sx={{ bgcolor: 'rgba(25, 118, 210, 0.1)', color: 'primary.main' }}
                 />
                 <Chip
                   label="Est. 1979"
-                  sx={{ bgcolor: 'primary.light', color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
+                  sx={{ bgcolor: 'rgba(25, 118, 210, 0.1)', color: 'primary.main' }}
                 />
               </Stack>
             </Grid>
