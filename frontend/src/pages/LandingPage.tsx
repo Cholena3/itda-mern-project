@@ -145,7 +145,7 @@ const LandingPage: React.FC = () => {
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={8}>
               <Typography variant="h2" gutterBottom sx={{ fontWeight: 700 }}>
-                ITDA, Paralakhemundi
+                ITDA Paralakhemundi
               </Typography>
               <Typography variant="h5" gutterBottom sx={{ mb: 3, opacity: 0.95 }}>
                 Empowering Tribal Communities Through Integrated Development
