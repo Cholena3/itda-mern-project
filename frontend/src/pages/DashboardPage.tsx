@@ -210,7 +210,7 @@ const DashboardPage: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        ITDA Gajapati - Dashboard
+        ITDA Paralakhemundi - Dashboard
       </Typography>
 
       {/* Stats Cards */}

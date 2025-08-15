@@ -127,7 +127,7 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
     <div>
       <Toolbar>
         <Typography variant="h6" noWrap component="div" color="primary">
-          ITDA
+          ITDA Paralakhemundi
         </Typography>
       </Toolbar>
       <Divider />
@@ -193,7 +193,7 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
           </IconButton>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {navigationItems.find(item => item.path === location.pathname)?.label || 'ITDA Management System'}
+            {navigationItems.find(item => item.path === location.pathname)?.label || 'ITDA Paralakhemundi Management System'}
           </Typography>
 
           {/* Quick Access Buttons */}

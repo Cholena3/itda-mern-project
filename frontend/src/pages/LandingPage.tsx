@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,7 +11,15 @@ import {
   Avatar,
   Divider,
   Chip,
-  Stack
+  Stack,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import {
@@ -28,11 +36,29 @@ import {
   LocationOn,
   Phone,
   Email,
-  ArrowForward
+  ArrowForward,
+  Facebook,
+  Twitter,
+  Instagram,
+  YouTube,
+  Menu as MenuIcon,
+  Close
 } from '@mui/icons-material';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navItems = [
+    'Home',
+    'About District', 
+    'Directory',
+    'Documents',
+    'Notices',
+    'Contact Us'
+  ];
 
   const statsData = [
     { label: 'Tribal Population', value: '1,35,000+', color: '#1976d2' },
@@ -98,59 +124,241 @@ const LandingPage: React.FC = () => {
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar
-                sx={{
-                  width: 50,
-                  height: 50,
-                  bgcolor: 'primary.main'
+              <img
+                src="/images/logo-odisha.png"
+                alt="ITDA Logo"
+                style={{
+                  width: 70,
+                  height: 70,
+                  objectFit: 'contain'
                 }}
-              >
-                <AccountBalance />
-              </Avatar>
+              />
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
                   ITDA Paralakhemundi
                 </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  Integrated Tribal Development Agency
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                  ST&SC Development
+                </Typography>
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                  Government of Odisha
                 </Typography>
               </Box>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<Login />}
-              onClick={() => navigate('/login')}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 3
-              }}
-            >
-              Login
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                  Shri Mohan Charan Majhi
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  Hon'ble Chief Minister
+                </Typography>
+              </Box>
+              <img
+                src="/images/mohan-majhi-cm_2.png"
+                alt="Hon'ble Chief Minister"
+                style={{
+                  width: 80,
+                  height: 80,
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  border: '2px solid #1976d2'
+                }}
+              />
+            </Box>
           </Box>
         </Container>
+        
+        {/* Navigation Bar */}
+        <Box
+          sx={{
+            bgcolor: 'primary.main',
+            width: '100%',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                minHeight: '48px'
+              }}
+            >
+              {/* Desktop Navigation */}
+              {!isMobile ? (
+                <>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      gap: 0,
+                      '& > *': {
+                        position: 'relative'
+                      }
+                    }}
+                  >
+                    {navItems.map((item, index) => (
+                      <Button
+                        key={item}
+                        onClick={() => {
+                          if (item === 'Home') {
+                            navigate('/');
+                          }
+                        }}
+                        sx={{
+                          color: 'white',
+                          px: { md: 2, lg: 3 },
+                          py: 1.5,
+                          borderRadius: 0,
+                          textTransform: 'none',
+                          fontSize: { md: '0.85rem', lg: '0.95rem' },
+                          fontWeight: 500,
+                          position: 'relative',
+                          '&:hover': {
+                            bgcolor: 'rgba(255, 255, 255, 0.1)',
+                            '&::after': {
+                              width: '100%'
+                            }
+                          },
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: 0,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 0,
+                            height: '3px',
+                            backgroundColor: 'white',
+                            transition: 'width 0.3s ease'
+                          },
+                          borderRight: index < navItems.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none'
+                        }}
+                      >
+                        {item}
+                      </Button>
+                    ))}
+                  </Box>
+                  <Button
+                    variant="contained"
+                    startIcon={<Login />}
+                    onClick={() => navigate('/login')}
+                    sx={{
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      textTransform: 'none',
+                      px: 2,
+                      py: 0.75,
+                      mr: 2,
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.9)'
+                      }
+                    }}
+                  >
+                    Login
+                  </Button>
+                </>
+              ) : (
+                /* Mobile Navigation */
+                <>
+                  <IconButton
+                    onClick={() => setMobileMenuOpen(true)}
+                    sx={{ color: 'white', ml: 1 }}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Login />}
+                    onClick={() => navigate('/login')}
+                    sx={{
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      textTransform: 'none',
+                      px: 1.5,
+                      py: 0.5,
+                      mr: 1,
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.9)'
+                      }
+                    }}
+                  >
+                    Login
+                  </Button>
+                </>
+              )}
+            </Box>
+          </Container>
+        </Box>
+        
+        {/* Mobile Menu Drawer */}
+        <Drawer
+          anchor="left"
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: 250,
+              bgcolor: 'primary.main',
+              color: 'white'
+            }
+          }}
+        >
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Menu</Typography>
+            <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: 'white' }}>
+              <Close />
+            </IconButton>
+          </Box>
+          <Divider sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
+          <List>
+            {navItems.map((item) => (
+              <ListItem key={item} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    if (item === 'Home') {
+                      navigate('/');
+                    }
+                    setMobileMenuOpen(false);
+                  }}
+                  sx={{
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)'
+                    }
+                  }}
+                >
+                  <ListItemText primary={item} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Drawer>
       </Box>
 
       {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          pt: 15,
+          background: 'white',
+          color: 'primary.main',
+          pt: 25,
           pb: 8
         }}
       >
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={8}>
-              <Typography variant="h2" gutterBottom sx={{ fontWeight: 700 }}>
+              <Typography variant="h2" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
                 ITDA Paralakhemundi
               </Typography>
-              <Typography variant="h5" gutterBottom sx={{ mb: 3, opacity: 0.95 }}>
+              <Typography variant="h5" gutterBottom sx={{ mb: 3, color: 'text.secondary' }}>
                 Empowering Tribal Communities Through Integrated Development
               </Typography>
-              <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.8 }}>
+              <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.8, color: 'text.primary' }}>
                 The Integrated Tribal Development Agency (ITDA), headquartered at Paralakhemundi, 
                 is dedicated to the socio-economic development of tribal communities in the district. 
                 Covering 5 blocks with a significant tribal population including the PVTG Lanjia Saora community, 
@@ -160,11 +368,11 @@ const LandingPage: React.FC = () => {
                 <Chip
                   icon={<LocationOn />}
                   label="Paralakhemundi"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                  sx={{ bgcolor: 'primary.light', color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
                 />
                 <Chip
                   label="Est. 1979"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                  sx={{ bgcolor: 'primary.light', color: 'primary.main', bgcolor: 'rgba(25, 118, 210, 0.1)' }}
                 />
               </Stack>
             </Grid>
@@ -279,44 +487,88 @@ const LandingPage: React.FC = () => {
       </Box>
 
       {/* Contact Section */}
-      <Box sx={{ bgcolor: 'grey.100', py: 6 }}>
+      <Box sx={{ bgcolor: 'grey.100', py: 4 }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4}>
+          <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Head Office
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
-                <LocationOn sx={{ mr: 1, color: 'primary.main', mt: 0.5 }} />
-                <Typography variant="body2">
-                  ITDA Office<br />
-                  Paralakhemundi<br />
-                  Odisha - 761200
+              {/* Empty grid item for spacing */}
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 1.5 }}>
+                  Office Address
                 </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2, justifyContent: 'center' }}>
+                  <LocationOn sx={{ mr: 1, color: 'primary.main', mt: 0.5 }} />
+                  <Typography variant="body2" sx={{ textAlign: 'left' }}>
+                    ITDA Office<br />
+                    Paralakhemundi<br />
+                    Gajapati District<br />
+                    Odisha - 761200
+                  </Typography>
+                </Box>
+                
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2, mb: 1.5 }}>
+                  Contact Us
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5, justifyContent: 'center' }}>
+                  <Phone sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="body2">+91-6815-253201</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'center' }}>
+                  <Email sx={{ mr: 1, color: 'primary.main' }} />
+                  <Typography variant="body2">itda@odisha.gov.in</Typography>
+                </Box>
+                
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mt: 2, mb: 1.5 }}>
+                  Follow Us
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 1.5 }}>
+                  <Avatar 
+                    sx={{ 
+                      bgcolor: '#1877f2',
+                      cursor: 'pointer',
+                      '&:hover': { transform: 'scale(1.1)' },
+                      transition: 'transform 0.2s'
+                    }}
+                  >
+                    <Facebook />
+                  </Avatar>
+                  <Avatar 
+                    sx={{ 
+                      bgcolor: '#1da1f2',
+                      cursor: 'pointer',
+                      '&:hover': { transform: 'scale(1.1)' },
+                      transition: 'transform 0.2s'
+                    }}
+                  >
+                    <Twitter />
+                  </Avatar>
+                  <Avatar 
+                    sx={{ 
+                      bgcolor: '#e4405f',
+                      cursor: 'pointer',
+                      '&:hover': { transform: 'scale(1.1)' },
+                      transition: 'transform 0.2s'
+                    }}
+                  >
+                    <Instagram />
+                  </Avatar>
+                  <Avatar 
+                    sx={{ 
+                      bgcolor: '#ff0000',
+                      cursor: 'pointer',
+                      '&:hover': { transform: 'scale(1.1)' },
+                      transition: 'transform 0.2s'
+                    }}
+                  >
+                    <YouTube />
+                  </Avatar>
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Contact Us
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Phone sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="body2">+91-6815-253201</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Email sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="body2">itda@odisha.gov.in</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                Working Hours
-              </Typography>
-              <Typography variant="body2">
-                Monday - Friday: 10:00 AM - 5:30 PM<br />
-                Saturday: 10:00 AM - 1:30 PM<br />
-                Sunday & Holidays: Closed
-              </Typography>
+              {/* Empty grid item for spacing */}
             </Grid>
           </Grid>
         </Container>

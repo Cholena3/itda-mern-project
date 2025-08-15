@@ -65,7 +65,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'ITDA API Documentation',
 }));
 
-// Health check endpoint with caching
+// Health check endpoints with caching
 app.get('/health', cacheStrategies.custom(10), async (req, res) => {
   const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const redisStatus = redis.status === 'ready' ? 'connected' : 'disconnected';
@@ -79,6 +79,28 @@ app.get('/health', cacheStrategies.custom(10), async (req, res) => {
       websocket: 'active'
     },
     metrics: {
+      onlineUsers,
+      uptime: process.uptime(),
+      memory: process.memoryUsage()
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Also expose health at /api/health for consistency
+app.get('/api/health', cacheStrategies.custom(10), async (req, res) => {
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  const redisStatus = redis.status === 'ready' ? 'connected' : 'disconnected';
+  const onlineUsers = socketService.getOnlineUsersCount();
+  
+  res.json({ 
+    status: 'ok', 
+    services: {
+      mongodb: mongoStatus,
+      redis: redisStatus,
+      websocket: 'active'
+    },
+    stats: {
       onlineUsers,
       uptime: process.uptime(),
       memory: process.memoryUsage()
