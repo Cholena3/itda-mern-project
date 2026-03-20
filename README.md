@@ -1,180 +1,128 @@
 # ITDA Project Management System
 
-A comprehensive web application for managing Integrated Tribal Development Agency (ITDA) projects in Parlakhemundi, Gajapati District, Odisha. Built with MERN stack for robust performance and scalability.
-
-## Features
-
-- **User Authentication**: Secure login system with JWT tokens
-- **Dashboard**: Overview of schemes, projects, works with visual charts
-- **Schemes Management**: Create, update, delete, and view schemes
-- **Projects Management**: Manage projects under schemes with progress tracking
-- **Works Management**: Track individual work items under projects
-- **Progress Tracking**: Visual progress monitoring with charts and graphs
-- **Photo Upload**: Upload and manage work progress photos
+A full-stack web application for managing Integrated Tribal Development Agency (ITDA) projects in Parlakhemundi, Gajapati District, Odisha. Built to track government schemes, projects, and works across tribal development blocks.
 
 ## Tech Stack
 
-### Backend
-- Node.js & Express.js
-- MongoDB with Mongoose ODM
-- JWT for authentication
-- Multer for file uploads
-- Bcrypt for password hashing
+**Backend:** Node.js, Express.js, MongoDB, Redis, Socket.io, GraphQL (Apollo Server)
+**Frontend:** React 19, TypeScript, Material-UI, React Query, Recharts
+**Infrastructure:** Docker, GitHub Actions CI/CD, Nginx, Render
 
-### Frontend
-- React with TypeScript
-- Material-UI for components
-- React Router for navigation
-- Axios for API calls
-- Recharts for data visualization
+## Features
 
-## Installation
-
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or cloud instance)
-- npm or yarn
-
-### Setup Instructions
-
-1. **Clone the repository**
-```bash
-cd itda-mern
-```
-
-2. **Install backend dependencies**
-```bash
-npm install
-```
-
-3. **Install frontend dependencies**
-```bash
-cd frontend
-npm install
-```
-
-4. **Configure environment variables**
-Create a `.env` file in the root directory:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/itda_project_management
-JWT_SECRET=your-secret-key-change-this-in-production
-NODE_ENV=development
-```
-
-5. **Create upload directories**
-```bash
-mkdir -p backend/uploads/work_photos
-```
-
-6. **Start MongoDB**
-Make sure MongoDB is running on your system.
-
-7. **Run the application**
-
-For development (runs both backend and frontend):
-```bash
-npm run dev
-```
-
-Or run separately:
-
-Backend only:
-```bash
-npm run server
-```
-
-Frontend only:
-```bash
-npm run client
-```
+- **Authentication & RBAC** — JWT-based auth with role-based access control (admin/manager/viewer). Granular permissions matrix controlling access at the resource + action level, enforced on both API and UI.
+- **Schemes / Projects / Works Management** — Full CRUD with hierarchical data model (Scheme → Project → Work). Location-based filtering by district, block, gram panchayat, and village.
+- **Dashboard & Analytics** — Real-time statistics, budget tracking, progress visualization with Recharts, work status distribution.
+- **Real-Time Updates** — Socket.io for live notifications, online user tracking, and collaborative awareness.
+- **Search** — Full-text search across schemes, projects, and works with natural language query support.
+- **Caching** — Redis caching layer with per-resource TTL strategies and smart invalidation.
+- **Security** — Rate limiting, input sanitization (XSS/NoSQL injection prevention), Helmet.js security headers, audit logging.
+- **API Documentation** — Swagger/OpenAPI 3.0 interactive docs at `/api-docs`.
+- **Monitoring** — System health checks, performance metrics, service status dashboard.
+- **Photo Management** — Upload and manage work progress photos with Multer.
+- **User Management** — Admin panel for managing users, changing roles, and account activation/deactivation.
 
 ## Project Structure
 
 ```
-itda-mern/
 ├── backend/
-│   ├── models/         # MongoDB schemas
-│   ├── routes/         # API endpoints
-│   ├── uploads/        # File upload directory
-│   └── server.js       # Express server setup
+│   ├── config/          # Redis, Swagger, permissions config
+│   ├── graphql/         # GraphQL schema
+│   ├── middleware/       # Auth, RBAC, caching, security
+│   ├── models/          # Mongoose schemas
+│   ├── routes/          # REST API endpoints
+│   ├── services/        # AI, search, socket, tracing services
+│   └── server.js
 ├── frontend/
 │   ├── src/
-│   │   ├── components/ # Reusable React components
-│   │   ├── contexts/   # React contexts (Auth)
-│   │   ├── pages/      # Page components
-│   │   └── App.tsx     # Main App component
+│   │   ├── components/  # Reusable UI components
+│   │   ├── contexts/    # Auth & Socket contexts
+│   │   ├── pages/       # Page components
+│   │   ├── services/    # API client
+│   │   └── types/       # TypeScript type definitions
 │   └── package.json
-├── .env                # Environment variables
-└── package.json        # Backend dependencies
+├── docker-compose.yml
+├── Dockerfile
+├── nginx.conf
+└── render.yaml
 ```
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login (returns JWT + permissions) |
+| GET | `/api/auth/me` | Get current user profile |
 
-### Schemes
-- `GET /api/schemes` - Get all schemes
-- `POST /api/schemes` - Create new scheme
-- `PUT /api/schemes/:id` - Update scheme
-- `DELETE /api/schemes/:id` - Delete scheme
+### Resources (Schemes, Projects, Works)
+All resource endpoints follow REST conventions with RBAC enforcement:
+| Method | Action | Admin | Manager | Viewer |
+|--------|--------|-------|---------|--------|
+| GET | Read | ✅ | ✅ | ✅ |
+| POST | Create | ✅ | ✅ | ❌ |
+| PUT | Update | ✅ | ✅ | ❌ |
+| DELETE | Delete | ✅ | Varies | ❌ |
 
-### Projects
-- `GET /api/projects` - Get all projects
-- `GET /api/projects/scheme/:schCode` - Get projects by scheme
-- `POST /api/projects` - Create new project
-- `PUT /api/projects/:id` - Update project
-- `DELETE /api/projects/:id` - Delete project
+### Other Endpoints
+- `GET /api/dashboard/stats` — Dashboard statistics
+- `GET /api/users` — User management (admin/manager)
+- `PUT /api/users/:id/role` — Change user role (admin only)
+- `POST /api/search/advanced` — Full-text search
+- `GET /api/monitoring/metrics` — System metrics
+- `GET /health` — Health check
 
-### Works
-- `GET /api/works` - Get all works
-- `GET /api/works/project/:projCode` - Get works by project
-- `POST /api/works` - Create new work
-- `PUT /api/works/:id` - Update work
-- `DELETE /api/works/:id` - Delete work
+## Setup
 
-### Dashboard
-- `GET /api/dashboard/stats` - Get dashboard statistics
-- `GET /api/dashboard/recent-projects` - Get recent projects
-- `GET /api/dashboard/progress-overview` - Get progress overview
+### Prerequisites
+- Node.js v18+
+- MongoDB (local or Atlas)
+- Redis (optional, for caching)
 
-## Default Login Credentials
-
-For testing, you can create a user through the API or MongoDB directly:
-
-```javascript
-// Use this in MongoDB shell or Compass
-db.users.insertOne({
-  username: "admin",
-  email: "admin@itda.com",
-  password: "$2a$10$YourHashedPasswordHere", // Use bcrypt to hash
-  role: "admin",
-  department: "IT",
-  isActive: true
-})
-```
-
-## Development
-
-### Adding New Features
-1. Create model in `backend/models/`
-2. Add routes in `backend/routes/`
-3. Update server.js to include new routes
-4. Create frontend components in `frontend/src/`
-5. Update navigation if needed
-
-### Build for Production
+### Installation
 
 ```bash
-cd frontend
-npm run build
+# Install dependencies
+npm install
+cd frontend && npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your MongoDB URI and JWT secret
+
+# Run in development
+npm run dev
 ```
 
-The build files will be in `frontend/build/` directory.
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret key for JWT signing |
+| `PORT` | Backend port (default: 5000) |
+| `REDIS_URL` | Redis connection URL (optional) |
+| `NODE_ENV` | Environment (development/production) |
+
+### Docker
+
+```bash
+docker-compose up --build
+```
+
+## RBAC Permission Matrix
+
+| Resource | Admin | Manager | Viewer |
+|----------|-------|---------|--------|
+| Schemes | CRUD | CRU | R |
+| Projects | CRUD | CRU | R |
+| Works | CRUD | CRUD | R |
+| Photos | CRD | CRD | R |
+| Users | Full Manage | Read | — |
+| Dashboard | Read | Read | Read |
+| Monitoring | Read | Read | — |
 
 ## License
 
-This project is proprietary to ITDA.
+Proprietary — ITDA Parlakhemundi, Gajapati District, Odisha.
