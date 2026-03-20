@@ -37,8 +37,11 @@ import { API_URL } from '../config/api.config';
 interface WorkFormData extends CreateWorkData {}
 
 const WorksPage: React.FC = () => {
-  const { user } = useAuth();
-  const isViewer = user?.role === 'viewer';
+  const { can } = useAuth();
+  const canCreate = can('works', 'create');
+  const canUpdate = can('works', 'update');
+  const canDelete = can('works', 'delete');
+  const canModify = canCreate || canUpdate || canDelete;
   
   const [works, setWorks] = useState<Work[]>([]);
   const [schemes, setSchemes] = useState<Scheme[]>([]);
@@ -278,7 +281,7 @@ const WorksPage: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Works Management</Typography>
-        {!isViewer && (
+        {canCreate && (
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -307,13 +310,13 @@ const WorksPage: React.FC = () => {
               <TableCell>Start Date</TableCell>
               <TableCell>End Date</TableCell>
               <TableCell>Status</TableCell>
-              {!isViewer && <TableCell align="right">Actions</TableCell>}
+              {canModify && <TableCell align="right">Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
             {works.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isViewer ? 8 : 9} align="center">
+                <TableCell colSpan={canModify ? 9 : 8} align="center">
                   <Typography color="textSecondary">No works found</Typography>
                 </TableCell>
               </TableRow>
@@ -361,23 +364,27 @@ const WorksPage: React.FC = () => {
                       size="small"
                     />
                   </TableCell>
-                  {!isViewer && (
+                  {canModify && (
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(work)}
-                        title="Edit"
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDelete(work)}
-                        title="Delete"
-                        color="error"
-                      >
-                        <Delete />
-                      </IconButton>
+                      {canUpdate && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDialog(work)}
+                          title="Edit"
+                        >
+                          <Edit />
+                        </IconButton>
+                      )}
+                      {canDelete && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(work)}
+                          title="Delete"
+                          color="error"
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>

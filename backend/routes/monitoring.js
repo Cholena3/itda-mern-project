@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/authorize');
 const os = require('os');
 const redis = require('../config/redis');
 const socketService = require('../services/socketService');
 
+// All monitoring routes require auth + monitoring:read
+router.use(authenticate);
+router.use(authorize('monitoring', 'read'));
+
 // Get system metrics
-router.get('/metrics', auth, async (req, res) => {
+router.get('/metrics', async (req, res) => {
   try {
     // Calculate system metrics
     const cpuUsage = os.loadavg()[0] * 10; // Simplified CPU usage
@@ -42,7 +46,7 @@ router.get('/metrics', auth, async (req, res) => {
 });
 
 // Get service health status
-router.get('/health', auth, async (req, res) => {
+router.get('/health', async (req, res) => {
   try {
     const services = [];
     
@@ -116,7 +120,7 @@ router.get('/health', auth, async (req, res) => {
 });
 
 // Get performance data
-router.get('/performance', auth, async (req, res) => {
+router.get('/performance', async (req, res) => {
   try {
     const { period = '24h' } = req.query;
     
@@ -141,7 +145,7 @@ router.get('/performance', auth, async (req, res) => {
 });
 
 // Get queue metrics
-router.get('/queues', auth, async (req, res) => {
+router.get('/queues', async (req, res) => {
   try {
     // Mock queue metrics
     const queues = [
@@ -160,7 +164,7 @@ router.get('/queues', auth, async (req, res) => {
 });
 
 // Get alerts
-router.get('/alerts', auth, async (req, res) => {
+router.get('/alerts', async (req, res) => {
   try {
     const alerts = [
       {
@@ -191,7 +195,7 @@ router.get('/alerts', auth, async (req, res) => {
 });
 
 // Create alert
-router.post('/alerts', auth, async (req, res) => {
+router.post('/alerts', async (req, res) => {
   try {
     const { severity, message } = req.body;
     

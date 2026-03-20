@@ -3,8 +3,9 @@ const router = express.Router();
 const Scheme = require('../models/Scheme');
 const Project = require('../models/Project');
 const Work = require('../models/Work');
+const { authenticate, authorize } = require('../middleware/authorize');
 
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticate, authorize('dashboard', 'read'), async (req, res) => {
   try {
     // Basic counts - fast queries
     const [

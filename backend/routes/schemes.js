@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Scheme = require('../models/Scheme');
+const { authenticate, authorize } = require('../middleware/authorize');
 
-// Get all schemes
-router.get('/', async (req, res) => {
+// Public read — still requires auth
+router.get('/', authenticate, authorize('schemes', 'read'), async (req, res) => {
   try {
     const schemes = await Scheme.find().sort({ createdAt: -1 });
     res.json(schemes);
@@ -12,28 +13,25 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get scheme by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, authorize('schemes', 'read'), async (req, res) => {
   try {
     const scheme = await Scheme.findById(req.params.id);
-    if (!scheme) {
-      return res.status(404).json({ message: 'Scheme not found' });
-    }
+    if (!scheme) return res.status(404).json({ message: 'Scheme not found' });
     res.json(scheme);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Create new scheme
-router.post('/', async (req, res) => {
+// Create — admin & manager only
+router.post('/', authenticate, authorize('schemes', 'create'), async (req, res) => {
   const scheme = new Scheme({
     name: req.body.name,
     description: req.body.description,
     budget: req.body.budget,
     startDate: req.body.startDate,
     endDate: req.body.endDate,
-    status: req.body.status || 'Planning'
+    status: req.body.status || 'Planning',
   });
 
   try {
@@ -44,15 +42,12 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update scheme
-router.put('/:id', async (req, res) => {
+// Update — admin & manager only
+router.put('/:id', authenticate, authorize('schemes', 'update'), async (req, res) => {
   try {
     const scheme = await Scheme.findById(req.params.id);
-    if (!scheme) {
-      return res.status(404).json({ message: 'Scheme not found' });
-    }
+    if (!scheme) return res.status(404).json({ message: 'Scheme not found' });
 
-    // Update fields
     scheme.name = req.body.name || scheme.name;
     scheme.description = req.body.description || scheme.description;
     scheme.budget = req.body.budget || scheme.budget;
@@ -67,13 +62,11 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete scheme
-router.delete('/:id', async (req, res) => {
+// Delete — admin only
+router.delete('/:id', authenticate, authorize('schemes', 'delete'), async (req, res) => {
   try {
     const scheme = await Scheme.findById(req.params.id);
-    if (!scheme) {
-      return res.status(404).json({ message: 'Scheme not found' });
-    }
+    if (!scheme) return res.status(404).json({ message: 'Scheme not found' });
 
     await scheme.deleteOne();
     res.json({ message: 'Scheme deleted successfully' });

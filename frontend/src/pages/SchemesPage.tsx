@@ -33,8 +33,11 @@ import { useAuth } from '../contexts/AuthContext';
 interface SchemeFormData extends CreateSchemeData {}
 
 const SchemesPage: React.FC = () => {
-  const { user } = useAuth();
-  const isViewer = user?.role === 'viewer';
+  const { can } = useAuth();
+  const canCreate = can('schemes', 'create');
+  const canUpdate = can('schemes', 'update');
+  const canDelete = can('schemes', 'delete');
+  const canModify = canCreate || canUpdate || canDelete;
   
   const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,7 +183,7 @@ const SchemesPage: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Schemes Management</Typography>
-        {!isViewer && (
+        {canCreate && (
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -207,13 +210,13 @@ const SchemesPage: React.FC = () => {
               <TableCell>Start Date</TableCell>
               <TableCell>End Date</TableCell>
               <TableCell>Status</TableCell>
-              {!isViewer && <TableCell align="right">Actions</TableCell>}
+              {canModify && <TableCell align="right">Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
             {schemes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isViewer ? 6 : 7} align="center">
+                <TableCell colSpan={canModify ? 7 : 6} align="center">
                   <Typography color="textSecondary">No schemes found</Typography>
                 </TableCell>
               </TableRow>
@@ -240,15 +243,17 @@ const SchemesPage: React.FC = () => {
                       size="small"
                     />
                   </TableCell>
-                  {!isViewer && (
+                  {canModify && (
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(scheme)}
-                        title="Edit"
-                      >
-                        <Edit />
-                      </IconButton>
+                      {canUpdate && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDialog(scheme)}
+                          title="Edit"
+                        >
+                          <Edit />
+                        </IconButton>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>

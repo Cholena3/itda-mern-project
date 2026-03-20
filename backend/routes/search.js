@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/authorize');
 const Project = require('../models/Project');
 const Scheme = require('../models/Scheme');
 const Work = require('../models/Work');
@@ -23,7 +23,7 @@ router.get('/test', async (req, res) => {
 });
 
 // Advanced search endpoint
-router.post('/advanced', auth, async (req, res) => {
+router.post('/advanced', authenticate, authorize('search', 'read'), async (req, res) => {
   try {
     const { query = '', filters = {} } = req.body;
     
@@ -122,7 +122,7 @@ router.post('/advanced', auth, async (req, res) => {
 });
 
 // Natural language search endpoint
-router.post('/natural', auth, async (req, res) => {
+router.post('/natural', authenticate, authorize('search', 'read'), async (req, res) => {
   try {
     const { query = '' } = req.body;
     
@@ -187,7 +187,7 @@ router.post('/natural', auth, async (req, res) => {
 });
 
 // Search suggestions endpoint  
-router.get('/suggestions', auth, async (req, res) => {
+router.get('/suggestions', authenticate, authorize('search', 'read'), async (req, res) => {
   try {
     const { q = '' } = req.query;
     

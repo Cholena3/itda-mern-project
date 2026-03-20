@@ -35,8 +35,10 @@ import { API_URL } from '../config/api.config';
 interface ProjectFormData extends CreateProjectData {}
 
 const ProjectsPage: React.FC = () => {
-  const { user } = useAuth();
-  const isViewer = user?.role === 'viewer';
+  const { can } = useAuth();
+  const canCreate = can('projects', 'create');
+  const canUpdate = can('projects', 'update');
+  const canModify = canCreate || canUpdate;
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [schemes, setSchemes] = useState<Scheme[]>([]);
@@ -232,7 +234,7 @@ const ProjectsPage: React.FC = () => {
     <Box sx={{ p: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">Projects Management</Typography>
-        {!isViewer && (
+        {canCreate && (
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -260,13 +262,13 @@ const ProjectsPage: React.FC = () => {
               <TableCell>Start Date</TableCell>
               <TableCell>End Date</TableCell>
               <TableCell>Status</TableCell>
-              {!isViewer && <TableCell align="right">Actions</TableCell>}
+              {canModify && <TableCell align="right">Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
             {projects.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isViewer ? 7 : 8} align="center">
+                <TableCell colSpan={canModify ? 8 : 7} align="center">
                   <Typography color="textSecondary">No projects found</Typography>
                 </TableCell>
               </TableRow>
@@ -298,15 +300,17 @@ const ProjectsPage: React.FC = () => {
                       size="small"
                     />
                   </TableCell>
-                  {!isViewer && (
+                  {canModify && (
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDialog(project)}
-                        title="Edit"
-                      >
-                        <Edit />
-                      </IconButton>
+                      {canUpdate && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDialog(project)}
+                          title="Edit"
+                        >
+                          <Edit />
+                        </IconButton>
+                      )}
                     </TableCell>
                   )}
                 </TableRow>

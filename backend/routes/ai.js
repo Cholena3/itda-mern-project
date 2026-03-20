@@ -1,13 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/authorize');
 const aiService = require('../services/aiService');
 const Project = require('../models/Project');
 const Scheme = require('../models/Scheme');
 const Work = require('../models/Work');
 
+// All AI routes require authentication
+router.use(authenticate);
+
 // AI Chat endpoint
-router.post('/chat', auth, async (req, res) => {
+router.post('/chat', authorize('ai', 'create'), async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -29,7 +32,7 @@ router.post('/chat', auth, async (req, res) => {
 });
 
 // AI Predictions endpoint
-router.post('/predict', auth, async (req, res) => {
+router.post('/predict', authorize('ai', 'create'), async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -64,7 +67,7 @@ router.post('/predict', auth, async (req, res) => {
 });
 
 // AI Insights endpoint
-router.post('/insights', auth, async (req, res) => {
+router.post('/insights', authorize('ai', 'create'), async (req, res) => {
   try {
     const { query } = req.body;
     
@@ -119,7 +122,7 @@ router.post('/insights', auth, async (req, res) => {
 });
 
 // Get AI recommendations
-router.get('/recommendations', auth, async (req, res) => {
+router.get('/recommendations', authorize('ai', 'read'), async (req, res) => {
   try {
     const recommendations = await aiService.getRecommendations(req.user.id);
     

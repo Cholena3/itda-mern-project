@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, LoginData, RegisterData, AuthResponse } from '../types';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { User, LoginData, RegisterData, AuthResponse, Permissions, Resource, Action } from '../types';
 import { authAPI } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  permissions: Permissions;
+  can: (resource: Resource, action: Action) => boolean;
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
@@ -28,11 +30,24 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [permissions, setPermissions] = useState<Permissions>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
-  // Check if user is authenticated on mount
+  /**
+   * Check if the current user has permission for a resource + action.
+   * This is the main hook the UI uses to show/hide elements.
+   */
+  const can = useCallback(
+    (resource: Resource, action: Action): boolean => {
+      const resourcePerms = permissions[resource];
+      if (!resourcePerms) return false;
+      return resourcePerms.includes(action);
+    },
+    [permissions]
+  );
+
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
@@ -40,37 +55,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userData = await authAPI.me();
           setUser(userData);
+          setPermissions(userData.permissions || {});
         } catch (error) {
-          // Invalid token, remove it
           localStorage.removeItem('token');
           console.error('Authentication failed:', error);
         }
       }
       setIsLoading(false);
     };
-
     initializeAuth();
   }, []);
+
+  const handleAuthResponse = (response: AuthResponse) => {
+    localStorage.setItem('token', response.token);
+    const userData: User = {
+      _id: response._id,
+      username: response.username,
+      email: response.email,
+      role: response.role,
+      department: response.department,
+      createdAt: response.createdAt || new Date().toISOString(),
+      updatedAt: response.updatedAt || new Date().toISOString(),
+    };
+    setUser(userData);
+    setPermissions(response.permissions || {});
+  };
 
   const login = async (data: LoginData): Promise<void> => {
     try {
       setIsLoading(true);
       const response: AuthResponse = await authAPI.login(data);
-      
-      // Store token in localStorage
-      localStorage.setItem('token', response.token);
-      
-      // Set user data (backend returns user data directly, not nested)
-      const userData: User = {
-        _id: response._id,
-        username: response.username,
-        email: response.email,
-        role: response.role,
-        department: response.department,
-        createdAt: response.createdAt || new Date().toISOString(),
-        updatedAt: response.updatedAt || new Date().toISOString()
-      };
-      setUser(userData);
+      handleAuthResponse(response);
     } catch (error: any) {
       console.error('Login failed:', error);
       throw new Error(error.response?.data?.message || 'Login failed');
@@ -83,21 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       const response: AuthResponse = await authAPI.register(data);
-      
-      // Store token in localStorage
-      localStorage.setItem('token', response.token);
-      
-      // Set user data (backend returns user data directly, not nested)
-      const userData: User = {
-        _id: response._id,
-        username: response.username,
-        email: response.email,
-        role: response.role,
-        department: response.department,
-        createdAt: response.createdAt || new Date().toISOString(),
-        updatedAt: response.updatedAt || new Date().toISOString()
-      };
-      setUser(userData);
+      handleAuthResponse(response);
     } catch (error: any) {
       console.error('Registration failed:', error);
       throw new Error(error.response?.data?.message || 'Registration failed');
@@ -107,17 +108,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = (): void => {
-    // Remove token from localStorage
     authAPI.logout();
-    
-    // Clear user data
     setUser(null);
+    setPermissions({});
   };
 
   const refreshUser = async (): Promise<void> => {
     try {
       const userData = await authAPI.me();
       setUser(userData);
+      setPermissions(userData.permissions || {});
     } catch (error) {
       console.error('Failed to refresh user data:', error);
       logout();
@@ -128,15 +128,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isLoading,
     isAuthenticated,
+    permissions,
+    can,
     login,
     register,
     logout,
     refreshUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

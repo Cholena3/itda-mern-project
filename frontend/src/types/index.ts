@@ -5,6 +5,7 @@ export interface User {
   email: string;
   role: 'admin' | 'manager' | 'viewer';
   department?: string;
+  permissions?: Permissions;
   createdAt: string;
   updatedAt: string;
 }
@@ -15,10 +16,16 @@ export interface AuthResponse {
   email: string;
   role: 'admin' | 'manager' | 'viewer';
   department?: string;
+  permissions: Permissions;
   token: string;
   createdAt?: string;
   updatedAt?: string;
 }
+
+// RBAC permission types
+export type Action = 'create' | 'read' | 'update' | 'delete' | 'manage';
+export type Resource = 'schemes' | 'projects' | 'works' | 'photos' | 'users' | 'dashboard' | 'monitoring' | 'ai' | 'search' | 'locations';
+export type Permissions = Partial<Record<Resource, Action[]>>;
 
 export interface LoginData {
   email: string;

@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Work = require('../models/Work');
+const { authenticate, authorize } = require('../middleware/authorize');
 
-router.get('/', async (req, res) => {
+router.get('/', authenticate, authorize('works', 'read'), async (req, res) => {
   try {
     const works = await Work.find().populate('projectId').populate('schemeId');
-    // Transform the data to include scheme and project names directly
     const worksWithNames = works.map(work => {
       const workObj = work.toObject();
       return {
         ...workObj,
         schemeName: work.schemeId ? work.schemeId.name : 'Unknown Scheme',
-        projectName: work.projectId ? work.projectId.name : 'Unknown Project'
+        projectName: work.projectId ? work.projectId.name : 'Unknown Project',
       };
     });
     res.json(worksWithNames);
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/project/:projectId', async (req, res) => {
+router.get('/project/:projectId', authenticate, authorize('works', 'read'), async (req, res) => {
   try {
     const works = await Work.find({ projectId: req.params.projectId }).populate('projectId').populate('schemeId');
     res.json(works);
@@ -29,19 +29,17 @@ router.get('/project/:projectId', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, authorize('works', 'read'), async (req, res) => {
   try {
     const work = await Work.findById(req.params.id).populate('projectId').populate('schemeId');
-    if (!work) {
-      return res.status(404).json({ message: 'Work not found' });
-    }
+    if (!work) return res.status(404).json({ message: 'Work not found' });
     res.json(work);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticate, authorize('works', 'create'), async (req, res) => {
   const work = new Work({
     name: req.body.name,
     description: req.body.description,
@@ -51,7 +49,7 @@ router.post('/', async (req, res) => {
     status: req.body.status,
     progress: req.body.progress,
     startDate: req.body.startDate,
-    endDate: req.body.endDate
+    endDate: req.body.endDate,
   });
 
   try {
@@ -63,12 +61,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticate, authorize('works', 'update'), async (req, res) => {
   try {
     const work = await Work.findById(req.params.id);
-    if (!work) {
-      return res.status(404).json({ message: 'Work not found' });
-    }
+    if (!work) return res.status(404).json({ message: 'Work not found' });
 
     Object.assign(work, req.body);
     const updatedWork = await work.save();
@@ -79,13 +75,11 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticate, authorize('works', 'delete'), async (req, res) => {
   try {
     const work = await Work.findById(req.params.id);
-    if (!work) {
-      return res.status(404).json({ message: 'Work not found' });
-    }
-    
+    if (!work) return res.status(404).json({ message: 'Work not found' });
+
     await work.deleteOne();
     res.json({ message: 'Work deleted successfully' });
   } catch (error) {

@@ -228,6 +228,12 @@ app.use('/api/dashboard',
   require('./routes/dashboard')
 );
 
+// User management routes (RBAC protected internally)
+app.use('/api/users',
+  auditLog('USERS'),
+  require('./routes/users')
+);
+
 app.use('/api/locations',
   require('./routes/locations')
 );

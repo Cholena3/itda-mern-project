@@ -35,6 +35,7 @@ import {
   Notifications
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import { Resource } from '../types';
 import NotificationCenter from './NotificationCenter';
 import OnlineUsersIndicator from './OnlineUsersIndicator';
 
@@ -44,6 +45,7 @@ interface NavigationItem {
   label: string;
   path: string;
   icon: React.ReactNode;
+  resource: Resource;
 }
 
 const navigationItems: NavigationItem[] = [
@@ -51,36 +53,43 @@ const navigationItems: NavigationItem[] = [
     label: 'Dashboard',
     path: '/dashboard',
     icon: <Dashboard />,
+    resource: 'dashboard',
   },
   {
     label: 'Schemes',
     path: '/schemes',
     icon: <AccountTree />,
+    resource: 'schemes',
   },
   {
     label: 'Projects',
     path: '/projects',
     icon: <Assignment />,
+    resource: 'projects',
   },
   {
     label: 'Works',
     path: '/works',
     icon: <Work />,
+    resource: 'works',
   },
   {
     label: 'AI Search',
     path: '/search',
     icon: <Search />,
+    resource: 'search',
   },
   {
     label: 'Location Filter',
     path: '/filter',
     icon: <FilterList />,
+    resource: 'locations',
   },
   {
     label: 'System Monitor',
     path: '/monitoring',
     icon: <MonitorHeart />,
+    resource: 'monitoring',
   },
 ];
 
@@ -96,7 +105,10 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
   
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, can } = useAuth();
+
+  // Filter nav items based on user permissions
+  const visibleNavItems = navigationItems.filter(item => can(item.resource, 'read'));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -132,7 +144,7 @@ const Navigation: React.FC<NavigationProps> = ({ children }) => {
       </Toolbar>
       <Divider />
       <List>
-        {navigationItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isSelected = location.pathname === item.path;
           return (
             <ListItem key={item.path} disablePadding>

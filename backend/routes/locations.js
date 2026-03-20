@@ -3,6 +3,7 @@ const router = express.Router();
 const Project = require('../models/Project');
 const Work = require('../models/Work');
 const Scheme = require('../models/Scheme');
+const { authenticate, authorize } = require('../middleware/authorize');
 
 // Parlakhemundi ITDA Location Data
 const parlakhemundiLocations = {
@@ -100,8 +101,8 @@ const parlakhemundiLocations = {
   ]
 };
 
-// Get location hierarchy data - No auth required for public data
-router.get('/hierarchy', async (req, res) => {
+// Get location hierarchy data
+router.get('/hierarchy', authenticate, authorize('locations', 'read'), async (req, res) => {
   try {
     console.log('Location hierarchy requested');
     res.json(parlakhemundiLocations);
@@ -112,7 +113,7 @@ router.get('/hierarchy', async (req, res) => {
 });
 
 // Get unique locations from database
-router.get('/unique', async (req, res) => {
+router.get('/unique', authenticate, authorize('locations', 'read'), async (req, res) => {
   try {
     const [projectBlocks, workBlocks] = await Promise.all([
       Project.distinct('block'),
@@ -140,7 +141,7 @@ router.get('/unique', async (req, res) => {
 });
 
 // Filter data by location
-router.post('/filter', async (req, res) => {
+router.post('/filter', authenticate, authorize('locations', 'read'), async (req, res) => {
   try {
     const { district, block, gramPanchayat, village, dataType } = req.body;
     
@@ -213,7 +214,7 @@ router.post('/filter', async (req, res) => {
 });
 
 // Get statistics by location
-router.post('/stats', async (req, res) => {
+router.post('/stats', authenticate, authorize('locations', 'read'), async (req, res) => {
   try {
     const { district, block, gramPanchayat, village } = req.body;
     
