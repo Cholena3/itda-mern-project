@@ -145,12 +145,12 @@ const LandingPage: React.FC = () => {
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.5 } }}>
               <Box sx={{ textAlign: 'right' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main', fontSize: { xs: '0.7rem', sm: '0.875rem' } }}>
                   Shri Mohan Charan Majhi
                 </Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography variant="caption" color="textSecondary" sx={{ fontSize: { xs: '0.6rem', sm: '0.75rem' } }}>
                   Hon'ble Chief Minister
                 </Typography>
               </Box>
@@ -158,8 +158,8 @@ const LandingPage: React.FC = () => {
                 src="/images/mohan-majhi-cm_2.png"
                 alt="Hon'ble Chief Minister"
                 style={{
-                  width: 80,
-                  height: 80,
+                  width: isMobile ? 45 : 80,
+                  height: isMobile ? 45 : 80,
                   objectFit: 'cover',
                   borderRadius: '50%',
                   border: '2px solid #1976d2'
