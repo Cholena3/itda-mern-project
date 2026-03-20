@@ -30,6 +30,10 @@ const { cacheStrategies } = require('./middleware/cache');
 const app = express();
 const server = http.createServer(app);
 
+// Trust proxy — required for Render, Heroku, etc. behind reverse proxies
+// Fixes express-rate-limit ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1);
+
 // Initialize WebSocket service
 socketService.initialize(server, corsOptions);
 
