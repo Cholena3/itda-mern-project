@@ -259,8 +259,8 @@ const FilteredViewPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>
         Location-based Data Filter
       </Typography>
       <Typography variant="body2" color="textSecondary" gutterBottom>
@@ -268,15 +268,15 @@ const FilteredViewPage: React.FC = () => {
       </Typography>
 
       {/* Filter Controls */}
-      <Paper sx={{ p: 3, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 3 }, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <LocationOn color="primary" />
-          <Typography variant="h6">Location Filters</Typography>
+          <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>Location Filters</Typography>
         </Box>
         
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
           {/* District (Fixed for Parlakhemundi ITDA) */}
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
             <InputLabel>District</InputLabel>
             <Select 
               value="Gajapati (Parlakhemundi)" 
@@ -288,7 +288,7 @@ const FilteredViewPage: React.FC = () => {
           </FormControl>
 
           {/* Block */}
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
             <InputLabel>Block</InputLabel>
             <Select
               value={selectedBlock}
@@ -305,7 +305,7 @@ const FilteredViewPage: React.FC = () => {
           </FormControl>
 
           {/* Gram Panchayat */}
-          <FormControl sx={{ minWidth: 200 }} disabled={!selectedBlock}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }} disabled={!selectedBlock}>
             <InputLabel>Gram Panchayat</InputLabel>
             <Select
               value={selectedGP}
@@ -322,7 +322,7 @@ const FilteredViewPage: React.FC = () => {
           </FormControl>
 
           {/* Village */}
-          <FormControl sx={{ minWidth: 200 }} disabled={!selectedGP}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }} disabled={!selectedGP}>
             <InputLabel>Village</InputLabel>
             <Select
               value={selectedVillage}
@@ -339,7 +339,7 @@ const FilteredViewPage: React.FC = () => {
           </FormControl>
 
           {/* Data Type */}
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl sx={{ minWidth: { xs: '100%', sm: 200 } }}>
             <InputLabel>Data Type</InputLabel>
             <Select
               value={dataType}

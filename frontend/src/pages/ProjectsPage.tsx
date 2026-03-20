@@ -231,9 +231,9 @@ const ProjectsPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Projects Management</Typography>
+    <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} sx={{ flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>Projects Management</Typography>
         {canCreate && (
           <Button
             variant="contained"
@@ -251,7 +251,7 @@ const ProjectsPage: React.FC = () => {
         </Alert>
       )}
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow>

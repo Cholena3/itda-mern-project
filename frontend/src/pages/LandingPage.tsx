@@ -123,29 +123,29 @@ const LandingPage: React.FC = () => {
               py: 2
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 } }}>
               <img
                 src="/images/logo-odisha.png"
                 alt="ITDA Logo"
                 style={{
-                  width: 70,
-                  height: 70,
+                  width: isMobile ? 45 : 70,
+                  height: isMobile ? 45 : 70,
                   objectFit: 'contain'
                 }}
               />
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                <Typography variant={isMobile ? 'body1' : 'h6'} sx={{ fontWeight: 600, color: 'primary.main', lineHeight: 1.2 }}>
                   ITDA Paralakhemundi
                 </Typography>
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
                   ST&SC Development
                 </Typography>
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'block' }}>
+                <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
                   Government of Odisha
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1.5 }}>
               <Box sx={{ textAlign: 'right' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
                   Shri Mohan Charan Majhi
@@ -345,17 +345,17 @@ const LandingPage: React.FC = () => {
         sx={{
           background: 'white',
           color: 'primary.main',
-          pt: 25,
-          pb: 8
+          pt: { xs: 18, sm: 20, md: 25 },
+          pb: { xs: 4, md: 8 }
         }}
       >
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={8}>
-              <Typography variant="h2" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
+              <Typography variant="h2" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', fontSize: { xs: '1.75rem', sm: '2.5rem', md: '3.75rem' } }}>
                 ITDA Paralakhemundi
               </Typography>
-              <Typography variant="h5" gutterBottom sx={{ mb: 3, color: 'text.secondary' }}>
+              <Typography variant="h5" gutterBottom sx={{ mb: 3, color: 'text.secondary', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>
                 Empowering Tribal Communities Through Integrated Development
               </Typography>
               <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.8, color: 'text.primary' }}>
@@ -381,14 +381,14 @@ const LandingPage: React.FC = () => {
       </Box>
 
       {/* Statistics Section */}
-      <Container maxWidth="lg" sx={{ mt: -4, mb: 6 }}>
-        <Grid container spacing={3}>
+      <Container maxWidth="lg" sx={{ mt: { xs: -2, md: -4 }, mb: { xs: 3, md: 6 } }}>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
           {statsData.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid item xs={6} sm={6} md={3} key={index}>
               <Paper
                 elevation={3}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, md: 3 },
                   textAlign: 'center',
                   borderTop: `4px solid ${stat.color}`,
                   height: '100%'
@@ -396,7 +396,7 @@ const LandingPage: React.FC = () => {
               >
                 <Typography
                   variant="h3"
-                  sx={{ fontWeight: 700, color: stat.color, mb: 1 }}
+                  sx={{ fontWeight: 700, color: stat.color, mb: 1, fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' } }}
                 >
                   {stat.value}
                 </Typography>
@@ -577,11 +577,11 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <Box sx={{ bgcolor: 'grey.900', color: 'white', py: 3 }}>
         <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Typography variant="body2">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}>
               © 2024 ITDA. All rights reserved.
             </Typography>
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' } }}>
               Government of Odisha | ST & SC Development Department
             </Typography>
           </Box>

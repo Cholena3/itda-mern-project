@@ -214,18 +214,18 @@ const AdvancedSearch: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 1.5, sm: 2, md: 3 } }}>
       {/* Search Header */}
       <Paper
         elevation={3}
         sx={{
-          p: 3,
+          p: { xs: 2, md: 3 },
           mb: 3,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
         }}
       >
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>
           AI-Powered Search
         </Typography>
         <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
@@ -265,11 +265,11 @@ const AdvancedSearch: React.FC = () => {
         </Box>
 
         {/* Search Bar */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           <Autocomplete
             freeSolo
             options={suggestions}
-            sx={{ flex: 1 }}
+            sx={{ flex: 1, minWidth: { xs: '100%', sm: 'auto' } }}
             renderInput={(params) => (
               <TextField
                 {...params}

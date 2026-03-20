@@ -208,14 +208,14 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}>
         ITDA Paralakhemundi - Dashboard
       </Typography>
 
       {/* Stats Cards */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mb: 3 }}>
-        <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, md: 3 }, mb: 3 }}>
+        <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 22%' }, minWidth: 0 }}>
           <Card sx={{ bgcolor: '#fff', border: '2px solid #1976d2' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -236,7 +236,7 @@ const DashboardPage: React.FC = () => {
           </Card>
         </Box>
 
-        <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
+        <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 22%' }, minWidth: 0 }}>
           <Card sx={{ bgcolor: '#fff', border: '2px solid #9c27b0' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -257,7 +257,7 @@ const DashboardPage: React.FC = () => {
           </Card>
         </Box>
 
-        <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
+        <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 22%' }, minWidth: 0 }}>
           <Card sx={{ bgcolor: '#fff', border: '2px solid #4caf50' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -278,7 +278,7 @@ const DashboardPage: React.FC = () => {
           </Card>
         </Box>
 
-        <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 45%', md: '1 1 22%' } }}>
+        <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 22%' }, minWidth: 0 }}>
           <Card sx={{ bgcolor: '#fff', border: '2px solid #ff9800' }}>
             <CardContent>
               <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -301,7 +301,7 @@ const DashboardPage: React.FC = () => {
       </Box>
 
       {/* Charts */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, md: 3 } }}>
         {/* Scheme Budget Distribution */}
         <Box sx={{ flex: { xs: '1 1 100%', lg: '1 1 48%' } }}>
           <Paper sx={{ p: 3, height: '100%' }}>
